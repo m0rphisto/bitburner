@@ -1,11 +1,11 @@
 /** 
  * filename: grep.js
- * date: 2023-07-14
- * version: 0.1
- * author: .m0rph
- *    RAM: 5.25GB
+ *     date: 2023-07-15
+ *  version: 0.1
+ *   author: .m0rph
+ *      RAM: 3.00GB
  * 
- * descripttion:
+ * description:
  *    We simply need a unix grep !!!
  * 
  * @param {NS} ns
@@ -28,7 +28,7 @@ export async function main(ns) {
       stdin: '',
 
       /**
-       * Property: STDOUT :: @array :: Lines that were grepped out of files.
+       * Property: STDOUT :: @array :: Lines that were grepped out of the file.
        */
       stdout: [],
 
@@ -39,7 +39,7 @@ export async function main(ns) {
 
 
       /**
-       * Method: Get subnet of args[*] or set it undefined.
+       * Method: Get the lines that match the regular expression.
        */
       grep: () => {
 
@@ -48,50 +48,27 @@ export async function main(ns) {
          console.clear();
          console.log('mns.regex:'+mns.regex);
          console.log('mns.stdout:'+mns.stdout);
-         console.log('mns.stdin: '+mns.stdin);
-/*
-         ns.tprintf(`${c.cyan}Start getnet run at: ${md.getdate()}, ${md.gettime()}${c.reset}`);
-
-         //let i = 0, data = '', host, req = '###';
-         let i = 0, data = '', host, req = '';
-
-         while (host = hosts.shift()) {
-
-            if (mns.scanned.includes(host)) {
-               //req = sprintf(`${req}X###`);
-               continue;
-            }
-            
-            let line, h = ns.getServer(host);
-
-            if (! h.purchasedByPlayer) {
-               hosts = hosts.concat(mns.scan(h.hostname));
-               line = sprintf(
-                  //`${req} ${h.hostname}: ip(${h.ip}), hack(${h.requiredHackingSkill}), ports(${h.numOpenPortsRequired}), root(${(h.hasAdminRights)}), backdoor(${(h.backdoorInstalled)})`
-                  `${h.hostname}: ip(${h.ip}), hack(${h.requiredHackingSkill}), ports(${h.numOpenPortsRequired}), root(${(h.hasAdminRights)}), backdoor(${(h.backdoorInstalled)})`
-               );
-               ns.tprintf(`${c.cyan}${++i}) ${line}${c.reset}`);
-               data = `${data}${line}\n`;
-            }
-         }
-         mns.log(data);
- */
+         //console.log('mns.stdin: '+mns.stdin);
       }
    };
 
-   // At first we check the passed arguments.
    if (a.count(ns.args, 2)){
+      // At first we check the passed arguments.
       mns.regex = a.str(ns.args[0]) ? ns.args[0] : null;
       mns.stdin = a.str(ns.args[1]) && ns.fileExists(ns.args[1]) ? ns.read(ns.args[1]) : null;
+
+      mns.grep();
+      ns.tprintf(`${c.cyan}${mns.stdout}${c.reset}`);
+
+   } else {
+      ns.tprintf(`${c.red}`+
+         'ERROR ARGS :: '+
+            "\n\targs[0]->(STRING || regular expression),"+
+            "\n\targs[1]->(STRING || valid file name)"+
+            "\n\nExiting !!!"+
+            `${c.reset}`
+      );
    }
 
-   // grep the lines.
-   mns.grep();
-
-   // let's just check, if we hafe the file contents correctly loaded. 
-   ns.tprintf(`${c.cyan}File: ${ns.args[1]}:\n${mns.stdout}`);
-
-console.log('array: '+[1,2,3,4,5,6,7,8,9]);
-
-   //mns.print(mns.scan(ma.count(ns.args, 1) ? mns.check(ns.args[0]) : ns.getHostname()));
 }
+
