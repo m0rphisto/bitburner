@@ -1,9 +1,9 @@
 /**
  * filename: weaken.js
- *     date: 2023-07-03
- *  version: 1.0
+ *     date: 2023-07-15
+ *  version: 1.1
  *   author: .m0rph
- *      RAM: 1.80GB
+ *      RAM: 1.90GB
  * 
  * !!! Note:
  * !!!   The await keyword is needed for hack(), grow() and weaken(), because these commands take time to execute.
@@ -18,11 +18,15 @@ export async function main(ns) {
 
    'use strict'; // We better use strict mode !!!
 
-   let target, moneyThresh, securityThresh;
+   let target;
 
    if (ns.args.length > 0) {
-      // When a hostname was passed, hackit is likely to be executed from OutSide.
+      // When a hostname was passed, weaken is likely to be executed from OutSide.
       target = (typeof ns.args[0] === 'string') ? ns.args[0] : undefined;
+      if (! ns.serverExists(target)) {
+         ns.tprintf('ERROR :: %s does not exist. Exiting !!!', target);
+         ns.exit();
+      }
    } else {
       // Otherwise hackit is executed by the target itself.
       target = ns.getHostname();
