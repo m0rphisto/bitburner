@@ -32,6 +32,10 @@ export async function main(ns) {
       target = ns.getHostname();
    }
 
+
+   // At first we need to manipulate the log-window's title bar.
+   ns.setTitle(`.m0rph@${ns.getHostname()}:/scripts/grow.js ${target}`);
+
    if (target) {
       while(true) {
          await ns.grow(target);
