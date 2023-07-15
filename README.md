@@ -1,7 +1,6 @@
 
-------------------------------------------------------------------------
 #                      ~~~ Bitburner v2.3.1 ~~~ 
-------------------------------------------------------------------------
+
 ### This is my first GitHub repository
 
 Bitburner is a Cyber Punk browser game, where we have to code
