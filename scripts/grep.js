@@ -1,11 +1,11 @@
 /** 
  * filename: grep.js
- *     date: 2023-07-15
- *  version: 0.1
+ *     date: 2023-07-16
+ *  version: 0.2
  *   author: .m0rph
  *      RAM: 3.00GB
  * 
- * description:
+ * descripttion:
  *    We simply need a unix grep !!!
  * 
  * @param {NS} ns
@@ -23,42 +23,76 @@ export async function main(ns) {
    const mns = {
 
       /**
-       * Property: STDIN :: @string, cause ns.read(file) returns the file content as a string. :: File to grep.
+       * Property: @array :: Cause ns.read(file) returns the file content as a string. (File to grep through)
        */
-      stdin: '',
+      stdin: [],
 
       /**
-       * Property: STDOUT :: @array :: Lines that were grepped out of the file.
+       * Property: @array :: Lines that were grepped out of the file.
        */
       stdout: [],
 
       /**
-       * Property: Regular expression.
+       * Property: $string :: Passed regular expression.
        */
       regex: '',
 
+      /**
+       * Method: OK, so we need a page loader and later do a simple regex.test() on ONE LINE
+       *         of the loaded file, cause a browser's JavaScript engine is not smart
+       *         enough for hungry regular expressions. >> laughable <<
+       *         (Tested on Chrome's V8 and Steam)
+       * 
+       * So: RexExp.exec() fills RAM on stdin =~ /^(n00dles|ecorp|\.):.*$/
+       *     File to grep through was /log/getnet-TIMESTAMP.log.js
+       */
+      load: (str) => {
+
+         let k = 0;
+         for (let i = 0; i < str.length; i++) {
+
+            let char = str.charAt(i);
+
+            if (char == "\n") { // Whoops, we found a line feed.
+
+               k++;
+
+               continue;
+            }
+            mns.stdin[k] = sprintf(`${(mns.stdin[k]) ? mns.stdin[k] : ''}${char}`);
+         }
+      },
 
       /**
        * Method: Get the lines that match the regular expression.
        */
       grep: () => {
 
-         mns.stdout = new RegExp(mns.regex).exec(mns.stdin);
-
-         console.clear();
-         console.log('mns.regex:'+mns.regex);
-         console.log('mns.stdout:'+mns.stdout);
-         //console.log('mns.stdin: '+mns.stdin);
+         //k = 0;
+         let stdin = '',
+             regex = new RegExp(mns.regex);
+         while (stdin = mns.stdin.shift()) {
+            if (regex.test(stdin)) mns.stdout.push(stdin);
+         }
       }
    };
 
-   if (a.count(ns.args, 2)){
+   if (a.count(ns.args, 2)) {
+
       // At first we check the passed arguments.
       mns.regex = a.str(ns.args[0]) ? ns.args[0] : null;
-      mns.stdin = a.str(ns.args[1]) && ns.fileExists(ns.args[1]) ? ns.read(ns.args[1]) : null;
 
-      mns.grep();
-      ns.tprintf(`${c.cyan}${mns.stdout}${c.reset}`);
+      if (mns.regex) {
+
+         // Then we load the file contents.
+         if (a.str(ns.args[1]) && ns.fileExists(ns.args[1])) mns.load(ns.read(ns.args[1]));
+
+         // And finally grep() !!!
+         mns.grep();
+         if (mns.stdout) {
+            for (let stdout of mns.stdout) ns.tprintf(`${c.cyan}${stdout}${c.reset}`);
+         }
+      }
 
    } else {
       ns.tprintf(`${c.red}`+
@@ -69,6 +103,5 @@ export async function main(ns) {
             `${c.reset}`
       );
    }
-
 }
 
