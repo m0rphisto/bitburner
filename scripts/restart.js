@@ -1,7 +1,7 @@
 /** 
  * filename: restart.js
- *     date: 2023-07-17
- *  version: 0.1
+ *     date: 2023-07-20
+ *  version: 0.2
  *   author: .m0rph
  *      RAM: 7.80GB
  * 
@@ -15,6 +15,10 @@
 import {c} from '/modules/colors.js';
 import {d} from '/modules/datetime.js';
 import {a} from '/modules/arguments.js';
+
+export function autocomplete(data, args) {
+   return [...data.servers];
+}
 
 export async function main(ns) {
 

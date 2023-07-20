@@ -1,9 +1,9 @@
 /** 
  * filename: reboot.js
- *     date: 2023-07-16
- *  version: 0.4
+ *     date: 2023-07-20
+ *  version: 0.5
  *   author: .m0rph
- *      RAM: 7.00GB
+ *      RAM: 7.40GB
  * 
  * description:
  *    In case of an infinite loop, respectively game crash or augment installation (soft reset)
@@ -16,6 +16,10 @@
 import {c} from '/modules/colors.js';
 import {d} from '/modules/datetime.js';
 import {a} from '/modules/arguments.js';
+
+export function autocomplete(data, args) {
+   return [...data.servers];
+}
 
 export async function main(ns) {
 
