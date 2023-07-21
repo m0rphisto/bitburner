@@ -17,7 +17,7 @@ import {c} from '/modules/colors.js';
 import {a} from '/modules/arguments.js';
 
 export function autocomplete(data, args) {
-   return [...data.servers];
+   return [...data.scripts];
 }
 
 export async function main(ns) {
