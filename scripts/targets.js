@@ -1,7 +1,7 @@
 /** 
  * filename: targets.js
- * date: 2023-07-14
- * version: 0.1
+ * date: 2023-07-21
+ * version: 0.2
  * author: .m0rph
  *    RAM: 3.85GB
  * 
@@ -67,11 +67,15 @@ export async function main(ns) {
             let color, line, h = ns.getServer(host);
 
             if (! h.purchasedByPlayer) {
+
                hosts = hosts.concat(mns.scan(h.hostname));
-               if (h.backdoorInstalled) {
+
+               if (h.hasAdminRights) {
+
                   line = sprintf(
                      `${h.hostname}: ram(${ns.formatRam(h.maxRam)}), max(\$${ns.formatNumber(h.moneyMax)}), growth(${h.serverGrowth}), sec(${h.minDifficulty})`
                   );
+
                   color = h.maxRam == 0 ? c.red : c.cyan;
                   ns.tprintf(`${color}${++i}) ${line}${c.reset}`);
                   data = `${data}${line}\n`;
