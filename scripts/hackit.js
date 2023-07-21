@@ -1,7 +1,7 @@
 /**
  * filename: hackit.js
- *     date: 2023-07-08
- *  version: 0.5
+ *     date: 2023-07-21
+ *  version: 0.6
  *   author: .m0rph
  *      RAM: 3.75GB (with import of arguments.js)
  *      RAM: 2.55GB (without import)
@@ -19,6 +19,10 @@
 
 //import {ma} from '/modules/arguments.js';
 //import {mc} from '/modules/colors.js';
+
+export function autocomplete(data, args) {
+   return [...data.servers];
+}
 
 export async function main(ns) {
 

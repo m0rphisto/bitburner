@@ -1,9 +1,9 @@
 /** 
  * filename: serverinfo.js
- *     date: 2023-07-08
- *  version: 0.3
+ *     date: 2023-07-21
+ *  version: 0.4
  *   author: .m0rph
- *      RAM: 5.05GB
+ *      RAM: 2.55GB
  * 
  * @param {NS} ns
  *             ns.args[0]  A valid hostname
@@ -12,6 +12,10 @@
 
 import {c} from '/modules/colors.js';
 import {a} from '/modules/arguments.js';
+
+export function autocomplete(data, args) {
+   return [...data.servers];
+}
 
 export async function main(ns) {
 
