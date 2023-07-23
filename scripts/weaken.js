@@ -1,7 +1,7 @@
 /**
  * filename: weaken.js
- *     date: 2023-07-15
- *  version: 1.1
+ *     date: 2023-07-23
+ *  version: 1.2
  *   author: .m0rph
  *      RAM: 1.90GB
  * 
@@ -14,6 +14,7 @@
  * @param {NS} ns 
  * @param      ns.args[0]  string   hostname of target server
  */
+export function autocomplete(data, args) { return [...data.servers] }
 export async function main(ns) {
 
    'use strict'; // We better use strict mode !!!
