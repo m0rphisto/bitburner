@@ -1,12 +1,12 @@
 /** 
  * filename: cleanlog.js
- * date: 2023-07-27
- * version: 0.1
+ * date: 2023-07-29
+ * version: 0.2
  * author: .m0rph
  *    RAM: 2.80GB
  * 
  * descripttion:
- *    The logdir has to be cleaned sometimes. ;.)
+ *    The logdir has to be cleaned sometimes. ;-)
  * 
  * @param {NS} ns
  */
@@ -18,62 +18,16 @@ export async function main(ns) {
 
    'use strict';
 
-   const mns = {
+   let  data = `Cleanlog run started: ${d.getdate()}, ${d.gettime()}`;
 
-      /**
-       * Property: Timestamp for multiple file access on the same logfile.
-       */
-      timestamp: d.timestamp(),
+   const rm_file = (file) => {
+      let rm = ns.rm(file) ? 'OK' : 'FAILED';
+      data = `${data}\nDeleting ${file} ... ${rm}.`;
+   }
 
-      /**
-       * Property: logfile for this cleanlog run.
-       * Note:     We have to set the timestamp AFTER initialization of the mns object!
-       */
-      logfile: '/log/cleanlog-TIMESTAMP.js',
-
-
-      /**
-       * Property: Logfiles that have to be deleted.
-       */
-      logdir: [],
-
-
-      /**
-       * Method: Initialization :: collect logfiles that have to be deleted an store them in an array.
-       */
-      init () {
-         // Comment out during development.
-         this.logfile = this.logfile.replace(/TIMESTAMP/, this.timestamp);
-         this.logdir  = ns.ls('home', 'log/');
-      },
-
-
-      log (data) {
-         ns.write(this.logfile, data, 'w');
-      },
-
-      clean () {
-         
-         this.date = d.getdate();
-         this.time = d.gettime();
-
-         ns.tprintf(`${c.cyan}Start cleanlog run at: ${this.date}, ${this.time}${c.reset}`);
-
-         let file, data = `Cleanlog run started: ${this.date}, ${this.time}\n`;
-
-         while (file = this.logdir.shift()) {
-
-            let rm   = ns.rm(file) ? 'OK' : 'FAILED';
-
-            data = `${data}Deleting ${file} ... ${rm}.\n`;
-         }
-         this.log(data);
-
-         ns.tprintf(`${c.cyan}Run finished.${c.reset}`);
-      }
-   };
-
-   mns.init();
-   mns.clean();
+   ns.tprintf(`${c.cyan}${data}${c.reset}`);
+   ns.ls('home', 'log/').forEach(rm_file);
+   ns.write(`/log/cleanlog-${d.timestamp()}.js`, data, 'w');
+   ns.tprintf(`${c.cyan}Run finished.${c.reset}`);
 }
 
