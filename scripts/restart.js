@@ -1,7 +1,7 @@
 /** 
  * filename: restart.js
- *     date: 2023-07-20
- *  version: 0.2
+ *     date: 2023-07-29
+ *  version: 0.3
  *   author: .m0rph
  *      RAM: 7.80GB
  * 
@@ -35,25 +35,25 @@ export async function main(ns) {
       /**
        * Method: Validate passed argument.
        */
-      check: (arg) => {
-         return a.str(arg) ? ns.serverExists(arg) ? arg : mns.exit('Target does not exist.') : undefined;
+      check (arg) {
+         return a.str(arg) ? ns.serverExists(arg) ? arg : this.exit('Target does not exist.') : undefined;
       },
 
       /**
        * Method: Scan the actual subnet for hosts and remember root.
        */
-      scan: (hostname) => {
+      scan (hostname) {
          let host = (hostname) ? hostname : ns.getHostname();
-         if (! mns.scanned.includes(host)) mns.scanned.push(host);
+         if (! this.scanned.includes(host)) this.scanned.push(host);
          return ns.scan(host);
       },
 
       /**
        * Method: Get all servers and restart hackit on them.
        */
-      run: (target) => {
+      run (target) {
 
-         if (! target) mns.exit('ERROR ARGS :: String expected.')
+         if (! target) this.exit('ERROR ARGS :: String expected.')
 
          // Greetings new run ...
          ns.tprintf(`${c.yellow}restart run on ${d.getdate()} at ${d.gettime()}${c.reset}`);
@@ -65,11 +65,11 @@ export async function main(ns) {
 
          while (host = hosts.shift()) {
 
-            if (mns.scanned.includes(host)) continue;
+            if (this.scanned.includes(host)) continue;
             
             let h = ns.getServer(host);
 
-            if (! h.purchasedByPlayer) hosts = hosts.concat(mns.scan(h.hostname));
+            if (! h.purchasedByPlayer) hosts = hosts.concat(this.scan(h.hostname));
             if (  h.purchasedByPlayer || h.hasAdminRights) {
 
                // At first we have to check, if hackit is already running!
@@ -94,7 +94,7 @@ export async function main(ns) {
                   }
                }
             
-               // If the target's RAM 0GB, we cannot run scripts on it.
+               // If the target's RAM is 0GB, we cannot run scripts on it.
                const max = ns.getServerMaxRam(h.hostname); 
 
                if (max > 0 && !ps) {
@@ -114,7 +114,7 @@ export async function main(ns) {
       /**
        * Method: Error handler.
        */
-      exit: (msg) => {
+      exit (msg) {
          ns.tprintf(`${c.red}${msg} Exiting !!!${c.reset}`);
          ns.exit();
       }
@@ -122,4 +122,3 @@ export async function main(ns) {
 
    mns.run(a.count(ns.args, 1) ? mns.check(ns.args[0]) : mns.exit('No target passed'));
 }
-
