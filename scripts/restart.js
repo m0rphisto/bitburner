@@ -122,3 +122,4 @@ export async function main(ns) {
 
    mns.run(a.count(ns.args, 1) ? mns.check(ns.args[0]) : mns.exit('No target passed'));
 }
+
