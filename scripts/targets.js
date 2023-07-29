@@ -1,7 +1,7 @@
 /** 
  * filename: targets.js
- * date: 2023-07-21
- * version: 0.2
+ * date: 2023-07-29
+ * version: 0.4
  * author: .m0rph
  *    RAM: 3.85GB
  * 
@@ -26,34 +26,35 @@ export async function main(ns) {
       timestamp: d.timestamp(),
 
       /**
-       * Property: logfile for this getnet run.
-       * Note:     We have to set the timestamp AFTER initialization of the mns object!
-       */
-      logfile: '/log/targets-TIMESTAMP.log.js',
-
-      /**
        * Property: Hosts, that were already root for subnet scanning. 
        */
       scanned: ['home'],
 
 
       /**
+       * Method: Initialization of the mns object.
+       */
+      init () {
+         this.logfile = `/log/getnet-${this.timestamp}.js`;
+      },
+
+      /**
        * Method: Scan the actual subnet for hosts and remember root.
        */
-      scan: (hostname) => {
+      scan (hostname) {
          let host = (hostname) ? hostname : ns.getHostname();
-         if (! mns.scanned.includes(host)) mns.scanned.push(host);
+         if (! this.scanned.includes(host)) this.scanned.push(host);
          return ns.scan(host);
       },
 
-      log: (data, mode) => {
+      log (data, mode) {
          // mode: w = overwrite complete file, a = append data
          let m = (mode) ? mode : 'w';
          ns.tprintf(`${c.cyan}Writing data to logfile${c.reset}`);
-         ns.write(mns.logfile, data, m);
+         ns.write(this.logfile, data, m);
       },
 
-      print: (hosts) => {
+      print (hosts) {
 
          ns.tprintf(`${c.cyan}Start targets run at: ${d.getdate()}, ${d.gettime()}${c.reset}`);
          ns.tprintf(`${c.cyan}Note: ONLY r00ted servers !!!${c.reset}`);
@@ -62,31 +63,31 @@ export async function main(ns) {
 
          while (host = hosts.shift()) {
 
-            if (mns.scanned.includes(host)) continue;
+            if (this.scanned.includes(host)) continue;
             
             let color, line, h = ns.getServer(host);
 
             if (! h.purchasedByPlayer) {
 
-               hosts = hosts.concat(mns.scan(h.hostname));
+               hosts = hosts.concat(this.scan(h.hostname));
 
                if (h.hasAdminRights) {
 
                   line = sprintf(
-                     `${h.hostname}: ram(${ns.formatRam(h.maxRam)}), max(\$${ns.formatNumber(h.moneyMax)}), growth(${h.serverGrowth}), sec(${h.minDifficulty})`
+                     `${h.hostname}: ram(${ns.formatRam(h.maxRam)}), max(\$${ns.formatNumber(h.moneyMax)}), hack(${h.requiredHackingSkill}), growth(${h.serverGrowth}), sec(${h.minDifficulty})`
                   );
-
+                  
                   color = h.maxRam == 0 ? c.red : c.cyan;
                   ns.tprintf(`${color}${++i}) ${line}${c.reset}`);
                   data = `${data}${line}\n`;
                }
             }
          }
-         mns.log(data);
+         this.log(data);
       }
    };
-   // Comment out during development.
-   mns.logfile = mns.logfile.replace(/TIMESTAMP/, mns.timestamp);
 
+   mns.init();
    mns.print(mns.scan());
 }
+
