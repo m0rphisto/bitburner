@@ -1,7 +1,7 @@
 /** 
  * filename: targets.js
  * date: 2023-07-29
- * version: 0.4
+ * version: 0.5
  * author: .m0rph
  *    RAM: 3.85GB
  * 
@@ -35,7 +35,7 @@ export async function main(ns) {
        * Method: Initialization of the mns object.
        */
       init () {
-         this.logfile = `/log/getnet-${this.timestamp}.js`;
+         this.logfile = `/log/targets-${this.timestamp}.js`;
       },
 
       /**
