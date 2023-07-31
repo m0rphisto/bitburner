@@ -1,5 +1,5 @@
 /**
- * $Id: deploy.js v0.1 2023-07-31 21:30:15 CEST 5.75GB .m0rph $
+ * $Id: deploy.js v0.1 2023-07-31 21:38:29 CEST 5.75GB .m0rph $
  * 
  *
  * description:
@@ -84,8 +84,8 @@ export async function main(ns) {
          if (h.openPortCount >= h.numOpenPortsRequired) {
             
             ns.nuke(this.target);
-            ns.tprintf(`${c.magenta}Did nuke() ${this.target}. Don't forget the backdoor !!!${c.reset}`);
-            ns.tprintf(`${c.magenta}We're ready for the looper master.${c.reset}`);
+            ns.tprintf(`${c.cyan}Did nuke() ${this.target}. Don't forget the backdoor !!!${c.reset}`);
+            ns.tprintf(`${c.cyan}We're ready for the looper master.${c.reset}`);
          }
          else {
             ns.tprintf(`${c.red}Cannot nuke() ${this.target}.${c.reset}`);
@@ -121,6 +121,5 @@ export async function main(ns) {
 
    mns.init(a.count(ns.args, 1) ? mns.check(ns.args[0]) : mns.exit('No target passed'));
    mns.exploit();
-   mns.deploy();
 }
 
