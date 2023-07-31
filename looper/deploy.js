@@ -1,5 +1,5 @@
 /**
- * $Id: deploy.js v0.1 2023-07-31 19:07:37 CEST 5.45GB .m0rph $
+ * $Id: deploy.js v0.1 2023-07-31 21:30:15 CEST 5.15GB .m0rph $
  * 
  *
  * description:
@@ -41,6 +41,7 @@ export async function main(ns) {
          if (!arg) this.exit('ERROR ARGS :: String expected.');
 
          this.target  = arg;
+         this.files   = ['/looper/hack.js', '/looper/grow.js', '/looper/weaken.js'];
          this.logfile = `/log/looper-deploy.${this.target}.${d.timestamp()}.js`;
          this.log(
             `Looper deploy startet at ${d.getdate()}, ${d.gettime()}: ` +
@@ -89,7 +90,11 @@ export async function main(ns) {
          else {
             ns.tprintf(`${c.red}Cannot nuke() ${this.target}.${c.reset}`);
          }
+
+         // And finally copy the scripts onto the target server.
+         ns.scp(this.files, this.target);
       },
+
 
       /**
        * Method: Looper logger. We need a grepable logfile for later analysis.
@@ -116,4 +121,6 @@ export async function main(ns) {
 
    mns.init(a.count(ns.args, 1) ? mns.check(ns.args[0]) : mns.exit('No target passed'));
    mns.exploit();
+   mns.deploy();
 }
+
