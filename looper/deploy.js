@@ -82,6 +82,8 @@ export async function main(ns) {
          }
 
          if (h.openPortCount >= h.numOpenPortsRequired) {
+
+            // TODO: implement terminal hack for automated backdooring.
             
             ns.nuke(this.target);
             ns.tprintf(`${c.cyan}Did nuke() ${this.target}. Don't forget the backdoor !!!${c.reset}`);
