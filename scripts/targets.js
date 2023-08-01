@@ -1,5 +1,5 @@
 /** 
- * $Id: targets.js v0.6 2023-08-02 00:28:41 CEST 3.85GB .m0rph $
+ * $Id: targets.js v0.6 2023-08-02 01:25:30 CEST 3.85GB .m0rph $
  * 
  * descripttion:
  *    Get the r00ted and backdoored servers and log their stats.
@@ -31,16 +31,12 @@ export async function main(ns) {
        * Method: Initialization of the mns object.
        */
       init () {
-         this.logfile = `/log/targets-${this.timestamp}.js`;
-      },
 
-      /**
-       * Method: Scan the actual subnet for hosts and remember root.
-       */
-      scan (hostname) {
-         let host = (hostname) ? hostname : ns.getHostname();
-         if (! this.scanned.has(host)) this.scanned.add(host);
-         return ns.scan(host);
+         // Initialize logfile ...
+         this.logfile = `/log/targets-${this.timestamp}.js`;
+
+         // ... and scan the network.
+         this.scanned.forEach(a => ns.scan(a).forEach(b => this.scanned.add(b)));
       },
 
       log (data, mode) {
@@ -50,40 +46,32 @@ export async function main(ns) {
          ns.write(this.logfile, data, m);
       },
 
-      print (hosts) {
+      print () {
 
          ns.tprintf(`${c.cyan}Start targets run at: ${d.getdate()}, ${d.gettime()}${c.reset}`);
          ns.tprintf(`${c.cyan}Note: ONLY r00ted servers !!!${c.reset}`);
 
          let i = 0, data = '', host;
 
-         while (host = hosts.shift()) {
+         this.scanned.forEach(host => {
 
-            if (this.scanned.has(host)) continue;
-            
             let color, line, h = ns.getServer(host);
 
-            if (! h.purchasedByPlayer) {
+            if (! h.purchasedByPlayer && h.hasAdminRights) {
 
-               hosts = hosts.concat(this.scan(h.hostname));
-
-               if (h.hasAdminRights) {
-
-                  line = sprintf(
-                     `${h.hostname}: ram(${ns.formatRam(h.maxRam)}), max(\$${ns.formatNumber(h.moneyMax)}), hack(${h.requiredHackingSkill}), growth(${h.serverGrowth}), sec(${h.minDifficulty})`
-                  );
+               line = sprintf(
+                  `${h.hostname}: ram(${ns.formatRam(h.maxRam)}), max(\$${ns.formatNumber(h.moneyMax)}), hack(${h.requiredHackingSkill}), growth(${h.serverGrowth}), sec(${h.minDifficulty})`
+               );
                   
-                  color = h.maxRam == 0 ? c.red : c.cyan;
-                  ns.tprintf(`${color}${++i}) ${line}${c.reset}`);
-                  data = `${data}${line}\n`;
-               }
+               ns.tprintf(`${h.maxRam == 0 ? c.red : c.cyan}${++i}) ${line}${c.reset}`);
+               data = `${data}${line}\n`;
             }
-         }
+         });
          this.log(data);
       }
    };
 
    mns.init();
-   mns.print(mns.scan());
+   mns.print();
 }
 
