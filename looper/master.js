@@ -1,5 +1,5 @@
 /**
- * $Id: master.js v0.1 2023-08-01 13:36:58 CEST 5.45GB .m0rph $
+ * $Id: master.js v0.1 2023-08-01 20:52:59 CEST 4.60GB .m0rph $
  * 
  * Description:
  *    This is the looper master, that utilizes looper/{hack,grow,weaken}.js
@@ -37,165 +37,130 @@ export async function main(ns) {
 
    'use strict';
 
-   const mns = {
+   /**
+    * Error exit handler.
+    * 
+    * @param {string}   msg   Error message.
+    */
+   function exit (msg) {
+      ns.tprintf(`${c.red}ERROR: ${msg} Exiting !!!${c.reset}`);
+      ns.exit();
+   }
+   
 
-      /**
-       * Method: Validate passed argument.
-       * 
-       * @param {string}   arg   The target server (ns.args[0])
-       */
-      check (arg) {
-         return a.str(arg) ? ns.serverExists(arg) ? arg : this.exit('Target does not exist.') : undefined;
-      },
-
-      /**
-       * Method: Initialize looper.
-       * 
-       * @param   {string} arg   The target server.
-       */
-      init (arg) {
-
-         if (!arg) this.exit('ERROR ARGS :: String expected.');
-
-         this.target          = arg;
-
-         this.pid             = 0;
-         this.cmd             = '';
-
-         this.hack            = '/looper/hack.js';
-         this.grow            = '/looper/grow.js';
-         this.weaken          = '/looper/weaken.js';
-         this.logfile         = `/log/looper-master.${this.target}.${d.timestamp()}.js`;
-
-         this.min_security    = ns.getServerMinSecurityLevel(this.target);
-         this.max_money       = ns.getServerMaxMoney(this.target);
-         this.max_ram         = ns.getServerMaxRam(this.target);
-
-         this.weaken_thresh   = this.min_security + 1.5;
-         this.money_thresh    = this.max_money    * .75;
-         
-         this.weaken_threads  = Math.floor(this.max_ram / ns.getScriptRam(this.weaken, this.target));
-         this.grow_threads    = Math.floor(this.max_ram / ns.getScriptRam(this.grow,   this.target));
-         this.hack_threads    = Math.floor(this.max_ram / ns.getScriptRam(this.hack,   this.target));
-
-         this.log(
-            `Looper master startet at ${d.getdate()}, ${d.gettime()}:\n` +
-            `Initializing target data: ${this.target}\n`
-         );
-      },
-
-
-      /**
-       * Method: Kill the actual script on the target server.
-       *
-       * @returns {boolean} True if the process was killed correctly, false otherwise.
-       */
-      kill () {
-
-         let retval, msg = `${d.gettime()}: Trying to kill pid(${this.pid}) ${this.cmd} ... `;
-
-         retval = ns.kill(this.pid) ? 'OK' : 'FAILED';
-
-         this.log(`${msg}${retval}.\n`, 'a');
-
-         return retval == 'OK' ? true : false;
-      },
-
-      /**
-       * Method: Main looper routine ...
-       */
-      async run () {
-
-         let money, sec;
-
-         function ps_helper (c, kill) {
-
-            /**
-             * Due to redundancy we need a little helper.
-             */
-         
-            let 
-               cmd = c.toLowerCase(),
-               pre = `
-                  if (this.kill()) {
-               `,
-               start = `
-                     this.cmd = this.${cmd};
-                     this.pid = ns.exec(this.cmd, this.target, this.${cmd}_threads);
-                     this.log(\`${d.gettime()}: Started pid(\${this.pid}) \${this.cmd}.\n\`, 'a');
-                     await ns.sleep(ns.get${c}Time(this.target));
-               `,
-               post = `
-                  }
-                  else {
-                     this.log(\`ERROR: Could not kill pid(\${this.pid}) \${this.cmd}. Exiting !!!\`);
-                     ns.exit();
-                  }
-               `;
-
-            code = (kill) ? `${pre}${start}${post}` : start;
-
-            try {
-               eval(code);
-            }
-            catch (e) {
-
-               this.log(`ERROR: ${e}. Exiting !!!\n`);
-               ns.exit();
-            }
-         }
-
-         // At the beginning we start a weaken script ...
-         ps_helper('Weaken');
-
-         for (;;) {
- 
-            // And then we start monitoring.
-
-            money = ns.getServerMoneyAvailable(this.target),
-            sec   = ns.getServerSecurityLevel(this.target);
-
-            if (money >= this.money_thresh) {
-
-               // Money threshold reached, so we hack the box.
-               if (this.cmd != this.hack) ps_helper('Hack', !!1); // !!1 --> Gimme the boolean TRUE.
-            }
-            else if (sec >= this.weaken_thresh) {
-
-               // Too high security level, we have to weaken.
-               if (this.cmd != this.weaken) ps_helper('Weaken', !!1);
-            }
-            else {
-
-               // Otherwise grow to the max.
-               if (this.cmd != this.grow) ps_helper('Grow', !!1);
-            }
-         }
-      },
-
-      /**
-       * Method: Looper logger. We need a grepable logfile for later analysis.
-       * 
-       * @param {string}   data  Text that is written to the logfile.
-       * @param {string}   mode  File open mode >> w = create new file, a = append to file.
-       */
-      log (data, mode) {
-         const m = (mode) ? mode : 'w';
-         ns.print(`${c.cyan}${data}${c.reset}`);
-         ns.write(this.logfile, data, m);
-      },
-
-      /**
-       * Method: Error exit handler.
-       * 
-       * @param {string}   msg   Error message.
-       */
-      exit (msg) {
-         ns.tprintf(`${c.red}${msg} Exiting !!!${c.reset}`);
-         ns.exit();
-      }
+   /**
+    * Kill the actual script on the target server.
+    *
+    * @returns {boolean} True if the process was killed correctly, false otherwise.
+    */
+   function kill (pid, cmd) {
+      let retval, msg = `${d.gettime()}: Trying to kill pid(${pid}) ${cmd} ... `;
+      retval = ns.kill(pid) ? 'OK' : 'FAILED';
+      ns.print(`${c.cyan}${msg}${retval}${c.reset}`);
+      return retval == 'OK' ? true : false;
    }
 
-   mns.init(a.count(ns.args, 1) ? mns.check(ns.args[0]) : mns.exit('No target passed'));
-   mns.run();
+   /**
+    * At first the parameter validation.
+    */
+   a.count(ns.args, 1)
+      ? a.str(ns.args[0]) 
+         ? ns.serverExists(ns.args[0]) ? null : exit('Target does not exist.')
+         : exit('String expected.')
+      : exit('No target passed');
+      
+
+   /**
+    * Then the initialization section,
+    */
+   const
+      target         = ns.args[0],
+
+      hack           = '/looper/hack.js',
+      grow           = '/looper/grow.js',
+      weaken         = '/looper/weaken.js';
+
+   const
+      min_security   = ns.getServerMinSecurityLevel(target),
+      max_money      = ns.getServerMaxMoney(target),
+      max_ram        = ns.getServerMaxRam(target);
+
+   const
+      weaken_threads = Math.floor(max_ram / ns.getScriptRam(weaken, target)),
+      grow_threads   = Math.floor(max_ram / ns.getScriptRam(grow,   target)),
+      hack_threads   = Math.floor(max_ram / ns.getScriptRam(hack,   target));
+
+   const
+      weaken_thresh  = min_security * 1.25,
+      money_thresh   = max_money    * 0.75;
+
+
+
+   let money, sec, cmd, pid = 0;
+
+   // At the beginning we start a weaken script ...
+   cmd = weaken;
+   pid = ns.exec(cmd, target, weaken_threads);
+   ns.print(`${c.cyan}${d.gettime()}: Started pid(${pid}) ${cmd}.${c.reset}`);
+   await ns.sleep(ns.getWeakenTime(target) * 1.15);
+
+   for (;;) {
+
+      // And then we start monitoring.
+
+      money = ns.getServerMoneyAvailable(target),
+      sec   = ns.getServerSecurityLevel(target);
+
+      if (money >= money_thresh) {
+
+         // Money threshold reached, so we hack the box.
+
+         //if (cmd != hack) {
+            if (kill(pid, cmd)) {
+               cmd = hack;
+               pid = ns.exec(cmd, target, hack_threads);
+               ns.print(`${c.cyan}${d.gettime()}: Started pid(${pid}) ${cmd}.${c.reset}`);
+               await ns.sleep(ns.getHackTime(target) * 1.15);
+            }
+            else {
+               ns.print(`${c.red}ERROR: Could not kill pid(${pid}) ${cmd}. Exiting !!!${c.reset}`);
+               ns.exit();
+            }
+         //}
+      }
+      else if (sec >= weaken_thresh) {
+
+         // Too high security level, we have to weaken.
+
+         //if (cmd != weaken) {
+            if (kill(pid, cmd)) {
+               cmd = weaken;
+               pid = ns.exec(cmd, target, weaken_threads);
+               ns.print(`${c.cyan}${d.gettime()}: Started pid(${pid}) ${cmd}.${c.reset}`);
+               await ns.sleep(ns.getWeakenTime(target) * 1.15);
+            }
+              else {
+               ns.print(`${c.red}ERROR: Could not kill pid(${pid}) ${cmd}. Exiting !!!${c.reset}`);
+               ns.exit();
+            }
+         //}
+      }
+      else {
+
+         // Otherwise grow to the max.
+
+         //if (cmd != grow) {
+            if (kill(pid, cmd)) {
+               cmd = grow;
+               pid = ns.exec(cmd, target, grow_threads);
+               ns.print(`${c.cyan}${d.gettime()}: Started pid(${pid}) ${cmd}.${c.reset}`);
+               await ns.sleep(ns.getGrowTime(target) * 1.15);
+            }
+            else {
+               ns.print(`${c.red}ERROR: Could not kill pid(${pid}) ${cmd}. Exiting !!!${c.reset}`);
+               ns.exit();
+            }
+         //}
+      }
+   }
 }
