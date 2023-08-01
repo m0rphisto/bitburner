@@ -1,13 +1,9 @@
 /** 
- * filename: getnet.js
- * date: 2023-07-29
- * version: 0.3
- * author: .m0rph
- *    RAM: 5.25GB
+ * $Id: getnet.js v0.5 2023-08-01 23:48:03 CEST 5.25GB .m0rph $
  * 
  * descripttion:
  *    First step: Get the complete network and write them to getnet.log.js.
- *   Second step: Create a JSON file.
+ *   Second step: Create a JSON file. (TODO)
  * 
  * @param {NS} ns
  * @param      ns.args[0]  Hostname where the subnet is to be scanned.
@@ -31,7 +27,7 @@ export async function main(ns) {
       /**
        * Property: Hosts, that were already root for subnet scanning. 
        */
-      scanned: ['home'],
+      scanned: new Set(['home']),
 
 
       /**
@@ -53,7 +49,7 @@ export async function main(ns) {
        */
       scan (hostname) {
          let host = (hostname) ? hostname : ns.getHostname();
-         if (! this.scanned.includes(host)) this.scanned.push(host);
+         this.scanned.add(host);
          return ns.scan(host);
       },
 
@@ -71,7 +67,7 @@ export async function main(ns) {
 
          while (host = hosts.shift()) {
 
-            if (this.scanned.includes(host))  continue;
+            if (this.scanned.has(host))  continue;
             
             let line, h = ns.getServer(host);
 
