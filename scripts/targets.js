@@ -1,12 +1,8 @@
 /** 
- * filename: targets.js
- * date: 2023-07-29
- * version: 0.5
- * author: .m0rph
- *    RAM: 3.85GB
+ * $Id: targets.js v0.6 2023-08-02 00:28:41 CEST 3.85GB .m0rph $
  * 
  * descripttion:
- *    Get the backdoored servers and log their stats.
+ *    Get the r00ted and backdoored servers and log their stats.
  * 
  * @param {NS} ns
  */
@@ -28,7 +24,7 @@ export async function main(ns) {
       /**
        * Property: Hosts, that were already root for subnet scanning. 
        */
-      scanned: ['home'],
+      scanned: new Set(['home']),
 
 
       /**
@@ -43,14 +39,14 @@ export async function main(ns) {
        */
       scan (hostname) {
          let host = (hostname) ? hostname : ns.getHostname();
-         if (! this.scanned.includes(host)) this.scanned.push(host);
+         if (! this.scanned.has(host)) this.scanned.add(host);
          return ns.scan(host);
       },
 
       log (data, mode) {
          // mode: w = overwrite complete file, a = append data
          let m = (mode) ? mode : 'w';
-         ns.tprintf(`${c.cyan}Writing data to logfile${c.reset}`);
+         ns.tprintf(`${c.cyan}Writing data to logfile ${this.logfile}.${c.reset}`);
          ns.write(this.logfile, data, m);
       },
 
@@ -63,7 +59,7 @@ export async function main(ns) {
 
          while (host = hosts.shift()) {
 
-            if (this.scanned.includes(host)) continue;
+            if (this.scanned.has(host)) continue;
             
             let color, line, h = ns.getServer(host);
 
