@@ -1,5 +1,5 @@
 /**
- * $Id: master.js v0.1 2023-07-31 19:07:37 CEST 5.45GB .m0rph $
+ * $Id: master.js v0.1 2023-08-01 13:36:58 CEST 5.45GB .m0rph $
  * 
  * Description:
  *    This is the looper master, that utilizes looper/{hack,grow,weaken}.js
@@ -15,6 +15,10 @@
  * Note:
  *    The looper scripts have to be available on the target server.
  *    We use looper/deploy.js for that in front.
+ * 
+ * Note from discord:
+ *    weaken is 4x hacktime, grow is 3.2x, hack is 1x
+ *    ToDo: bake it into the monitoring.
  * 
  * 
  * @param {NS}       ns       The Netscript API.
@@ -70,27 +74,16 @@ export async function main(ns) {
          this.weaken_thresh   = this.min_security + 1.5;
          this.money_thresh    = this.max_money    * .75;
          
-         this.weaken_threads  = Math.float(this.max_ram / ns.getScriptRam(this.weaken, this.target));
-         this.grow_threads    = Math.float(this.max_ram / ns.getScriptRam(this.grow,   this.target));
-         this.hack_threads    = Math.float(this.max_ram / ns.getScriptRam(this.hack,   this.target));
+         this.weaken_threads  = Math.floor(this.max_ram / ns.getScriptRam(this.weaken, this.target));
+         this.grow_threads    = Math.floor(this.max_ram / ns.getScriptRam(this.grow,   this.target));
+         this.hack_threads    = Math.floor(this.max_ram / ns.getScriptRam(this.hack,   this.target));
 
          this.log(
-            `Looper master startet at ${d.getdate()}, ${d.gettime()}: ` +
-            `Initializing target data\.n`
+            `Looper master startet at ${d.getdate()}, ${d.gettime()}:\n` +
+            `Initializing target data: ${this.target}\n`
          );
       },
 
-      /**
-       * Method: Start cmd on the target server.
-       * 
-       * @param   {string}    Script name that should be run.
-       * @param   {string}    Number of threads.
-       * @returns {boolean}   True if the scripts was started correctly, false otherwise.
-       */
-      start (cmd, threads) {
-         
-         return ns.exec(cmd, this.target, threads);
-      },
 
       /**
        * Method: Kill the actual script on the target server.
@@ -118,7 +111,7 @@ export async function main(ns) {
          function ps_helper (c, kill) {
 
             /**
-             * Due to a redundancy we need a little helper.
+             * Due to redundancy we need a little helper.
              */
          
             let 
@@ -128,7 +121,7 @@ export async function main(ns) {
                `,
                start = `
                      this.cmd = this.${cmd};
-                     this.pid = this.exec(this.cmd, this.target, this.${cmd}_threads);
+                     this.pid = ns.exec(this.cmd, this.target, this.${cmd}_threads);
                      this.log(\`${d.gettime()}: Started pid(\${this.pid}) \${this.cmd}.\n\`, 'a');
                      await ns.sleep(ns.get${c}Time(this.target));
                `,
@@ -165,17 +158,17 @@ export async function main(ns) {
             if (money >= this.money_thresh) {
 
                // Money threshold reached, so we hack the box.
-               ps_helper('Hack', !!1); // !!1 --> Gimme the boolean TRUE.
+               if (this.cmd != this.hack) ps_helper('Hack', !!1); // !!1 --> Gimme the boolean TRUE.
             }
             else if (sec >= this.weaken_thresh) {
 
                // Too high security level, we have to weaken.
-               ps_helper('Weaken', !!1);
+               if (this.cmd != this.weaken) ps_helper('Weaken', !!1);
             }
             else {
 
                // Otherwise grow to the max.
-               ps_helper('Grow', !!1);
+               if (this.cmd != this.grow) ps_helper('Grow', !!1);
             }
          }
       },

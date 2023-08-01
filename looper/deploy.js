@@ -1,5 +1,5 @@
 /**
- * $Id: deploy.js v0.1 2023-07-31 21:38:29 CEST 5.75GB .m0rph $
+ * $Id: deploy.js v0.1 2023-08-01 17:41:13 CEST 5.75GB .m0rph $
  * 
  *
  * description:
@@ -45,7 +45,7 @@ export async function main(ns) {
          this.logfile = `/log/looper-deploy.${this.target}.${d.timestamp()}.js`;
          this.log(
             `Looper deploy startet at ${d.getdate()}, ${d.gettime()}: ` +
-            `Initializing target data\.n`
+            `Initializing target data.\n`
          );
       },
 
@@ -82,19 +82,22 @@ export async function main(ns) {
          }
 
          if (h.openPortCount >= h.numOpenPortsRequired) {
-
-            // TODO: implement terminal hack for automated backdooring.
             
             ns.nuke(this.target);
             ns.tprintf(`${c.cyan}Did nuke() ${this.target}. Don't forget the backdoor !!!${c.reset}`);
             ns.tprintf(`${c.cyan}We're ready for the looper master.${c.reset}`);
+            this.log(`Targed nuked. Don't forget the backdoor!\n`, 'a')
          }
          else {
             ns.tprintf(`${c.red}Cannot nuke() ${this.target}.${c.reset}`);
          }
 
          // And finally copy the scripts onto the target server.
-         ns.scp(this.files, this.target);
+         this.log(
+            `Copying looper scripts ... ${ns.scp(this.files, this.target) ? 'OK' : 'FAILED'}.` +
+            `\nDeployment finished. Exiting.`,
+            'a'
+         );
       },
 
 
