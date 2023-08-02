@@ -11,7 +11,7 @@
  * @param   {number} c     How much arguments should have been passed?
  */
 export function has_count(args, c) {
-   return (((c) ? parseInt(c) : 0) && args.length > 0 && args.length == c) ? true : false;
+   return args.length === c ? true : false;
 }
 
 /** @param {number} arg  Numeric value passed? */
@@ -57,7 +57,7 @@ export function is_float(arg) {
 export var a = {
 
    count: (args, c) => {
-      return (((c) ? parseInt(c) : 0) && args.length > 0 && args.length == c) ? true : false;
+      return args.length === c ? true : false;
    },
 
    //isRegEx: (arg) => { return arg.match(#/.*/#) ? true : false; },
