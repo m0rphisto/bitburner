@@ -1,5 +1,5 @@
 /** 
- * $Id: arguments.js v0.2 2023-08-02 17:41:47 CEST 2.90GB .m0rph $
+ * $Id: arguments.js v0.2 2023-08-02 18:56:43 CEST 2.90GB .m0rph $
  * 
  * descripttion:
  *    Module for argument handling on ns.args[*].
