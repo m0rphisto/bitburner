@@ -1,12 +1,19 @@
 /**
- * $Id: deploy.js v0.1 2023-08-01 17:41:13 CEST 5.75GB .m0rph $
+ * $Id: deploy.js v0.2 2023-08-02 16:47:38 CEST 5.75GB .m0rph $
  * 
  *
  * description:
  *    The looper deployment script.
  *
- * @param   {NS}       ns         The Netscaipt API.   
- * @param   {string}   ns.args[0] Name of the target server to exploit in order to gain root access.
+ * Note:
+ *    If one server was passed, {hack,grow,weaken}.js are copied to it and master.js runs externaly to control them.
+ *    Maybe on a purchased server or the home server. If two server were passed we have to deploy a purchased server
+ *    that is attacking another one. For this case, also master.js is copied to the first server.
+ *
+ *
+ * @param   {NS}       ns          The Netscaipt API.   
+ * @param   {string}   ns.args[0]  Target of exploitation and HGW, if no second target was passed.
+ * @param   {string}   ns.args[1]? Target of HGW. Argument is optional.
  */
 
 import {c} from '/modules/colors.js';
@@ -16,6 +23,7 @@ import {a} from '/modules/arguments.js';
 export function autocomplete(data, args) {
    return [...data.servers];
 }
+
 export async function main(ns) {
 
    'use strict';
@@ -23,24 +31,20 @@ export async function main(ns) {
    const mns = {
 
       /**
-       * Method: Validate passed argument.
-       * 
-       * @param {string}   arg   The target server (ns.args[0])
-       */
-      check (arg) {
-         return a.str(arg) ? ns.serverExists(arg) ? arg : this.exit('Target does not exist.') : undefined;
-      },
-
-      /**
        * Method: Initialize looper.
-       * 
-       * @param   {string} arg   The target server.
        */
-      init (arg) {
+      init () {
 
-         if (!arg) this.exit('ERROR ARGS :: String expected.');
+         if (a.count(ns.args, 0)) this.exit('No target passed');
 
-         this.target  = arg;
+         ns.args.forEach(arg => {
+
+            if (!a.str(arg))           this.exit(`ERROR ARGS :: ${arg} :: String expected.`);
+            if (!ns.serverExists(arg)) this.exit(`Target ${arg} does not exist.`);
+         });
+
+         this.target  = ns.args[0];
+         this.looper  = ns.args[1] ? ns.args[1] : undefined;
          this.files   = ['/looper/hack.js', '/looper/grow.js', '/looper/weaken.js'];
          this.logfile = `/log/looper-deploy.${this.target}.${d.timestamp()}.js`;
          this.log(
@@ -56,48 +60,59 @@ export async function main(ns) {
 
          const h = ns.getServer(this.target);
 
-         if (h.numOpenPortsRequired > 0) {
+         if (!h.purchasedByPlayer) {
 
-            const port_opener = ['BruteSSH', 'FTPCrack', 'HTTPWorm', 'relaySMTP', 'SQLInject'];
-            const open_port   = (port) => {
+            if (h.numOpenPortsRequired > 0) {
 
-               if (ns.fileExists(`${port}.exe`)) {
+               const port_opener = ['BruteSSH', 'FTPCrack', 'HTTPWorm', 'relaySMTP', 'SQLInject'];
+               const open_port   = (port) => {
 
-                  let msg, opener = `ns.${port.toLowerCase()}(this.target)`;
+                  if (ns.fileExists(`${port}.exe`)) {
 
-                  try {
-                     eval(opener);
-                     msg = `Opening port: Executing ${port}.exe\n`;
+                     let msg, opener = `ns.${port.toLowerCase()}(this.target)`;
+
+                     try {
+                        eval(opener);
+                        msg = `Opening port: Executing ${port}.exe\n`;
+                     }
+                     catch (e) {
+                        msg = `ERROR: ${e}\n`;
+                        ns.tprintf(`${c.red}ERROR: ${e}${reset}`);
+                     }
+
+                     this.log(msg, 'a');
                   }
-                  catch (e) {
-                     msg = `ERROR: ${e}\n`;
-                     ns.tprintf(`${c.red}ERROR: ${e}${reset}`);
-                  }
+               };
 
-                  this.log(msg, 'a');
-               }
-            };
+               port_opener.forEach(open_port);
+            }
 
-            port_opener.forEach(open_port);
-         }
-
-         if (h.openPortCount >= h.numOpenPortsRequired) {
+            if (h.openPortCount >= h.numOpenPortsRequired) {
             
-            ns.nuke(this.target);
-            ns.tprintf(`${c.cyan}Did nuke() ${this.target}. Don't forget the backdoor !!!${c.reset}`);
-            ns.tprintf(`${c.cyan}We're ready for the looper master.${c.reset}`);
-            this.log(`Targed nuked. Don't forget the backdoor!\n`, 'a')
-         }
-         else {
-            ns.tprintf(`${c.red}Cannot nuke() ${this.target}.${c.reset}`);
+               ns.nuke(this.target);
+               ns.tprintf(`${c.cyan}Did nuke() ${this.target}. Don't forget the backdoor !!!${c.reset}`);
+               ns.tprintf(`${c.cyan}We're ready for the looper master.${c.reset}`);
+               this.log(`Targed nuked. Don't forget the backdoor!\n`, 'a')
+            }
+            else {
+               ns.tprintf(`${c.red}Cannot nuke() ${this.target}.${c.reset}`);
+            }
          }
 
+         if (this.looper) this.files.push('/looper/master.js');
          // And finally copy the scripts onto the target server.
          this.log(
             `Copying looper scripts ... ${ns.scp(this.files, this.target) ? 'OK' : 'FAILED'}.` +
-            `\nDeployment finished. Exiting.`,
+            `\nDeployment finished. ${this.looper ? '' : 'Exiting.'}.`,
             'a'
          );
+
+         if (this.looper) {
+            // Deploy a pserv-N ? execute the looper master.
+            ns.exec('/looper/master.js', this.target, 1, ...[this.looper, true])
+               ? this.log(`\nExecuting looper master on ${this.target} to attack ${this.looper}.`, 'a')
+               : this.log(`\nError executing looper master on ${this.target}. Exiting !!!`, 'a');
+         }
       },
 
 
@@ -124,7 +139,7 @@ export async function main(ns) {
       }
    }
 
-   mns.init(a.count(ns.args, 1) ? mns.check(ns.args[0]) : mns.exit('No target passed'));
+   mns.init();
    mns.exploit();
 }
 
