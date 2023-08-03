@@ -1,5 +1,5 @@
 /**
- * $Id: deploy.js v0.2 2023-08-02 16:47:38 CEST 5.75GB .m0rph $
+ * $Id: deploy.js v0.3 2023-08-03 19:51:34 CEST 5.90GB .m0rph $
  * 
  *
  * description:
@@ -12,8 +12,8 @@
  *
  *
  * @param   {NS}       ns          The Netscaipt API.   
- * @param   {string}   ns.args[0]  Target of exploitation and HGW, if no second target was passed.
- * @param   {string}   ns.args[1]? Target of HGW. Argument is optional.
+ * @param   {string}   ns.args[0]  Target of attack.
+ * @param   {string}   ns.args[1]? Target of looper master. Argument is optional.
  */
 
 import {c} from '/modules/colors.js';
@@ -45,7 +45,7 @@ export async function main(ns) {
 
          this.target  = ns.args[0];
          this.looper  = ns.args[1] ? ns.args[1] : undefined;
-         this.files   = ['/looper/hack.js', '/looper/grow.js', '/looper/weaken.js'];
+         this.files   = ['/looper/hack.js', '/looper/grow.js', '/looper/weaken.js', '/modules/colors.js', '/modules/arguments.js', '/modules/datetime.js'];
          this.logfile = `/log/looper-deploy.${this.target}.${d.timestamp()}.js`;
          this.log(
             `Looper deploy startet at ${d.getdate()}, ${d.gettime()}: ` +
@@ -60,7 +60,7 @@ export async function main(ns) {
 
          const h = ns.getServer(this.target);
 
-         if (!h.purchasedByPlayer) {
+         if (!h.purchasedByPlayer && !h.hasRootAccess) {
 
             if (h.numOpenPortsRequired > 0) {
 
@@ -69,10 +69,10 @@ export async function main(ns) {
 
                   if (ns.fileExists(`${port}.exe`)) {
 
-                     let msg, opener = `ns.${port.toLowerCase()}(this.target)`;
+                     let msg;
 
                      try {
-                        eval(opener);
+                        ns[port.toLowerCase()](this.target);
                         msg = `Opening port: Executing ${port}.exe\n`;
                      }
                      catch (e) {
@@ -102,17 +102,19 @@ export async function main(ns) {
          if (this.looper) this.files.push('/looper/master.js');
          // And finally copy the scripts onto the target server.
          this.log(
-            `Copying looper scripts ... ${ns.scp(this.files, this.target) ? 'OK' : 'FAILED'}.` +
-            `\nDeployment finished. ${this.looper ? '' : 'Exiting.'}.`,
+            `Copying looper scripts ... ${ns.scp(this.files, this.looper ? this.looper : this.target) ? 'OK' : 'FAILED'}.` +
+            `\nDeployment finished. ${this.looper ? '' : 'Exiting.'}`,
             'a'
          );
 
          if (this.looper) {
             // Deploy a pserv-N ? execute the looper master.
-            ns.exec('/looper/master.js', this.target, 1, ...[this.looper, true])
-               ? this.log(`\nExecuting looper master on ${this.target} to attack ${this.looper}.`, 'a')
-               : this.log(`\nError executing looper master on ${this.target}. Exiting !!!`, 'a');
+            ns.getScriptRam; // Just a little static RAM feed3r...
+            ns.exec('/looper/master.js', this.looper, 1, ...[this.target, true])
+               ? this.log(`\nExecuting looper master on ${this.looper} to attack ${this.target}.`, 'a')
+               : this.log(`\nError executing looper master on ${this.looper}. Exiting !!!`, 'a');
          }
+         
       },
 
 

@@ -1,5 +1,5 @@
 /** 
- * $Id: reboot.js v0.8 2023-08-03 03:23:32 CEST 6.05GB .m0rph $
+ * $Id: reboot.js v0.9 2023-08-03 19:49:23 CEST 6.05GB .m0rph $
  * 
  * description:
  *    In case of an infinite loop, respectively game crash or augment installation (soft reset)
@@ -68,9 +68,8 @@ export async function main(ns) {
          const open_port   = (port) => {
 
             if (ns.fileExists(`${port}.exe`)) {
-               let opener = `ns.${port.toLowerCase()}(h.hostname)`;
                try {
-                  eval(opener);
+                  ns[port.toLowerCase()](h.hostname);
                } catch (e) {
                   ns.tprintf(`${c.red}ERROR: ${e}${reset}`);
                }
@@ -121,4 +120,7 @@ export async function main(ns) {
          }
       }
    });
+
+   // OK, and here is our little RAM feeder. :-)
+   ns.getScriptRam;
 }

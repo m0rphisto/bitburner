@@ -1,5 +1,5 @@
 /**
- * $Id: master.js v0.1 2023-08-01 20:52:59 CEST 4.60GB .m0rph $
+ * $Id: master.js v0.2 2023-08-03 19:54:49 CEST 4.70GB .m0rph $
  * 
  * Description:
  *    This is the looper master, that utilizes looper/{hack,grow,weaken}.js
@@ -22,12 +22,21 @@
  * 
  * 
  * @param {NS}       ns       The Netscript API.
- * @param {string}   target   Hostname of the target server.   (ns.args[0])
+ * @param {string}   target   Hostname of the target server.                       (ns.args[0])
+ * @param {boolean}  sself    Whether the master controls HGW externally or not.   (ns.args[1])
+ *                            True if the master controls HGW on the same machine            
+ *                            and attacks an external target, e.g. on a purchased
+ *                            server, false otherwise.
  */
 
 import {c} from '/modules/colors.js';
 import {d} from '/modules/datetime.js';
-import {a} from '/modules/arguments.js';
+
+import {
+   has_count,
+   is_string,
+   is_boolean
+} from '/modules/arguments.js';
 
 export function autocomplete(data, args) {
    return [...data.servers];
@@ -63,45 +72,68 @@ export async function main(ns) {
    /**
     * At first the parameter validation.
     */
-   a.count(ns.args, 1)
-      ? a.str(ns.args[0]) 
-         ? ns.serverExists(ns.args[0]) ? null : exit('Target does not exist.')
-         : exit('String expected.')
-      : exit('No target passed');
-      
+   has_count(ns.args, 0) ? exit('No target passed') : null;
+
+   has_count(ns.args, 1)
+      ? is_string(ns.args[0]) 
+         ? ns.serverExists(ns.args[0]) ? null : exit(`Target ${ns.args[0]} does not exist.`)
+         : exit(`ERROR :: ${ns.args[0]} :: String expected.`)
+      : null;
+
+   const sself =
+      has_count(ns.args, 2)
+         ? ns.args[1] === 0 || ns.args[1] === 1
+            ? !!ns.args[1]
+            : is_boolean(ns.args[1]) 
+               ? ns.args[1]
+               : exit(`ERROR :: ${ns.args[1]} :: Bool integer or boolean expected.`)
+         : false;
 
    /**
     * Then the initialization section,
     */
    const
-      target         = ns.args[0],
+      target         = ns.args[0];
+   
+   const
+      base           = sself ? ns.getHostname() : target,
+      args           = sself ? [target] : [''],
 
       hack           = '/looper/hack.js',
       grow           = '/looper/grow.js',
-      weaken         = '/looper/weaken.js';
+      weaken         = '/looper/weaken.js',
+      master         = '/looper/master.js';
 
    const
       min_security   = ns.getServerMinSecurityLevel(target),
       max_money      = ns.getServerMaxMoney(target),
-      max_ram        = ns.getServerMaxRam(target);
+      max_ram        = ns.getServerMaxRam(base);
 
    const
-      weaken_threads = Math.floor(max_ram / ns.getScriptRam(weaken, target)),
-      grow_threads   = Math.floor(max_ram / ns.getScriptRam(grow,   target)),
-      hack_threads   = Math.floor(max_ram / ns.getScriptRam(hack,   target));
+      has_ram        = max_ram - ns.getServerUsedRam(base),
+      weaken_ram     = ns.getScriptRam(weaken),
+      grow_ram       = ns.getScriptRam(grow),
+      hack_ram       = ns.getScriptRam(hack);
+
+   const
+      weaken_threads = Math.floor(has_ram / weaken_ram),
+      grow_threads   = Math.floor(has_ram / grow_ram),
+      hack_threads   = Math.floor(has_ram / hack_ram);
 
    const
       weaken_thresh  = min_security * 1.25,
       money_thresh   = max_money    * 0.75;
 
+// DEBUG
+//exit(`target: ${target}, base: ${base},  sself: ${sself}, args: ${args}`);
 
 
    let money, sec, cmd, pid = 0;
 
    // At the beginning we start a weaken script ...
    cmd = weaken;
-   pid = ns.exec(cmd, target, weaken_threads);
-   ns.print(`${c.cyan}${d.gettime()}: Started pid(${pid}) ${cmd}.${c.reset}`);
+   pid = ns.exec(cmd, base, weaken_threads, ...args);
+   ns.print(`${c.cyan}${d.gettime()}: Started pid(${pid}) ${cmd} on ${base}.${c.reset}`);
    await ns.sleep(ns.getWeakenTime(target) * 1.15);
 
    for (;;) {
@@ -118,12 +150,12 @@ export async function main(ns) {
          //if (cmd != hack) {
             if (kill(pid, cmd)) {
                cmd = hack;
-               pid = ns.exec(cmd, target, hack_threads);
-               ns.print(`${c.cyan}${d.gettime()}: Started pid(${pid}) ${cmd}.${c.reset}`);
+               pid = ns.exec(cmd, base, hack_threads, ...args);
+               ns.print(`${c.cyan}${d.gettime()}: Started pid(${pid}) ${cmd} on ${base}.${c.reset}`);
                await ns.sleep(ns.getHackTime(target) * 1.15);
             }
             else {
-               ns.print(`${c.red}ERROR: Could not kill pid(${pid}) ${cmd}. Exiting !!!${c.reset}`);
+               ns.print(`${c.red}ERROR: Could not kill pid(${pid}) ${cmd} on ${base}. Exiting !!!${c.reset}`);
                ns.exit();
             }
          //}
@@ -135,12 +167,12 @@ export async function main(ns) {
          //if (cmd != weaken) {
             if (kill(pid, cmd)) {
                cmd = weaken;
-               pid = ns.exec(cmd, target, weaken_threads);
-               ns.print(`${c.cyan}${d.gettime()}: Started pid(${pid}) ${cmd}.${c.reset}`);
+               pid = ns.exec(cmd, base, weaken_threads, ...args);
+               ns.print(`${c.cyan}${d.gettime()}: Started pid(${pid}) ${cmd} on ${base}.${c.reset}`);
                await ns.sleep(ns.getWeakenTime(target) * 1.15);
             }
               else {
-               ns.print(`${c.red}ERROR: Could not kill pid(${pid}) ${cmd}. Exiting !!!${c.reset}`);
+               ns.print(`${c.red}ERROR: Could not kill pid(${pid}) ${cmd} on ${base}. Exiting !!!${c.reset}`);
                ns.exit();
             }
          //}
@@ -152,15 +184,18 @@ export async function main(ns) {
          //if (cmd != grow) {
             if (kill(pid, cmd)) {
                cmd = grow;
-               pid = ns.exec(cmd, target, grow_threads);
-               ns.print(`${c.cyan}${d.gettime()}: Started pid(${pid}) ${cmd}.${c.reset}`);
+               pid = ns.exec(cmd, base, grow_threads, ...args);
+               ns.print(`${c.cyan}${d.gettime()}: Started pid(${pid}) ${cmd} on ${base}.${c.reset}`);
                await ns.sleep(ns.getGrowTime(target) * 1.15);
             }
             else {
-               ns.print(`${c.red}ERROR: Could not kill pid(${pid}) ${cmd}. Exiting !!!${c.reset}`);
+               ns.print(`${c.red}ERROR: Could not kill pid(${pid}) ${cmd} on ${base}. Exiting !!!${c.reset}`);
                ns.exit();
             }
          //}
       }
    }
+
+   // OK, and here is our little RAM feeder. :-)
+   ns.getScriptRam;
 }
