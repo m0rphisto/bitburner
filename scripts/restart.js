@@ -1,5 +1,5 @@
 /** 
- * $Id: restart.js v0.4 2023-08-04 16:49:02 CEST 7.80GB .m0rph $
+ * $Id: restart.js v0.4 2023-08-04 16:49:02 CEST 6.75GB .m0rph $
  * 
  * description:
  *    In case of new analysis, sometimes we need to restart hackit with another target !!!
