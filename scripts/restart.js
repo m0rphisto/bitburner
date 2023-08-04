@@ -1,9 +1,5 @@
 /** 
- * filename: restart.js
- *     date: 2023-07-29
- *  version: 0.3
- *   author: .m0rph
- *      RAM: 7.80GB
+ * $Id: restart.js v0.4 2023-08-04 16:49:02 CEST 7.80GB .m0rph $
  * 
  * description:
  *    In case of new analysis, sometimes we need to restart hackit with another target !!!
@@ -14,7 +10,10 @@
 
 import {c} from '/modules/colors.js';
 import {d} from '/modules/datetime.js';
-import {a} from '/modules/arguments.js';
+import {
+   has_count,
+   is_string
+} from '/modules/arguments.js';
 
 export function autocomplete(data, args) {
    return [...data.servers];
@@ -24,101 +23,78 @@ export async function main(ns) {
 
    'use strict';
 
-   const mns = {
+   /**
+    * Error exit handler.
+    * 
+    * @param {string}   msg   Error message.
+    */
+   const exit = (msg) => {
+      ns.tprintf(`${c.red}ERROR: ${msg} Exiting !!!${c.reset}`);
+      ns.exit();
+   }
 
-      /**
-       * Property: Hosts, that were already root for subnet scanning. 
-       */
-      scanned: ['home'],
 
+   /**
+    * At first the parameter validation.
+    */
+   has_count(ns.args, 0) ? exit('No target passed') : null;
 
-      /**
-       * Method: Validate passed argument.
-       */
-      check (arg) {
-         return a.str(arg) ? ns.serverExists(arg) ? arg : this.exit('Target does not exist.') : undefined;
-      },
+   has_count(ns.args, 1)
+      ? is_string(ns.args[0]) 
+         ? ns.serverExists(ns.args[0]) ? null : exit(`Target ${ns.args[0]} does not exist.`)
+         : exit(`ERROR :: ${ns.args[0]} :: String expected.`)
+      : null;
 
-      /**
-       * Method: Scan the actual subnet for hosts and remember root.
-       */
-      scan (hostname) {
-         let host = (hostname) ? hostname : ns.getHostname();
-         if (! this.scanned.includes(host)) this.scanned.push(host);
-         return ns.scan(host);
-      },
+   const 
+      target    = ns.args[0],
 
-      /**
-       * Method: Get all servers and restart hackit on them.
-       */
-      run (target) {
+      hackit    = '/scripts/hackit.js',
+      scriptram = ns.getScriptRam(hackit);
 
-         if (! target) this.exit('ERROR ARGS :: String expected.')
+   
+   // Greetings new run ...
+   ns.tprintf(`${c.yellow}restart run on ${d.getdate()} at ${d.gettime()}${c.reset}`);
 
-         // Greetings new run ...
-         ns.tprintf(`${c.yellow}restart run on ${d.getdate()} at ${d.gettime()}${c.reset}`);
+   let scanned = new Set(['home']);
+   scanned.forEach((a,i,sa) => ns.scan(a).forEach(b => sa.add(b))); // set.forEach((element,element-key,set) => callback)
+   scanned.forEach(host => {
 
-         //we start with the hosts on our own subnet.
-         const hackit    = '/scripts/hackit.js';
-         const scriptram = ns.getScriptRam(hackit);
-         let host, hosts = ns.scan('home');
+      if (host != 'home') {
 
-         while (host = hosts.shift()) {
+         const h = ns.getServer(host);
 
-            if (this.scanned.includes(host)) continue;
-            
-            let h = ns.getServer(host);
+         if (h.purchasedByPlayer || h.hasAdminRights) {
 
-            if (! h.purchasedByPlayer) hosts = hosts.concat(this.scan(h.hostname));
-            if (  h.purchasedByPlayer || h.hasAdminRights) {
+            // At first we have to check, if hackit is already running!
+            let ps = ns.ps(h.hostname);
 
-               // At first we have to check, if hackit is already running!
-               let ps = ns.ps(h.hostname);
+            for (let p of ps) {
 
-                     // DEBUG
-                     //ns.tprintf(`${c.magenta}DEBUG :: typeof ps ${typeof ps}${c.reset}`);
+               if ('/'+p.filename == hackit) {
 
-               for (let p of ps) {
+                  ns.tprintf(`${c.yellow}WARNING :: hackit with pid(${p.pid}) is running on ${h.hostname}. Trying to kill it.${c.reset}`);
 
-                     // DEBUG
-                     //ns.tprintf(`${c.magenta}DEBUG :: ${p.filename}, pid(${p.pid}) on ${h.hostname} ...${c.reset}`);
-
-                  if ('/'+p.filename == hackit) {
-
-                     ns.tprintf(`${c.yellow}WARNING :: hackit with pid(${p.pid}) is running on ${h.hostname}. Trying to kill it.${c.reset}`);
-
-                     if (ns.kill(p.pid)) { ps = null }
-                     else {
-                        ns.tprintf(`${c.red}ERROR :: hackit on ${h.hostname} and cannot be killed!${c.reset}`);
-                     }
+                  if (ns.kill(p.pid)) { ps = null }
+                  else {
+                     ns.tprintf(`${c.red}ERROR :: hackit on ${h.hostname} and cannot be killed!${c.reset}`);
                   }
                }
-            
-               // If the target's RAM is 0GB, we cannot run scripts on it.
-               const max = ns.getServerMaxRam(h.hostname); 
+            }
 
-               if (max > 0 && !ps) {
+            // If the target's RAM is 0GB, we cannot run scripts on it.
+            const max = ns.getServerMaxRam(h.hostname); 
 
-                  const threads = Math.floor(max / scriptram); 
+            if (max > 0 && !ps) {
 
-                  if (! ns.fileExists(hackit, h.hostname))
-                     ns.scp( hackit, h.hostname);
-                     ns.exec(hackit, h.hostname, threads, target);
+               const threads = Math.floor(max / scriptram); 
 
-                  ns.tprintf(`${c.green}SUCCESS :: hackit is running on ${h.hostname} and hacking ${target}${c.reset}`);
-               }
+               if (! ns.fileExists(hackit, h.hostname))
+                  ns.scp( hackit, h.hostname);
+                  ns.exec(hackit, h.hostname, threads, target);
+
+               ns.tprintf(`${c.green}SUCCESS :: hackit is running on ${h.hostname} and hacking ${target}${c.reset}`);
             }
          }
-      },
-
-      /**
-       * Method: Error handler.
-       */
-      exit (msg) {
-         ns.tprintf(`${c.red}${msg} Exiting !!!${c.reset}`);
-         ns.exit();
       }
-   };
-
-   mns.run(a.count(ns.args, 1) ? mns.check(ns.args[0]) : mns.exit('No target passed'));
+   });
 }

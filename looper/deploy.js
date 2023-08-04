@@ -1,5 +1,5 @@
 /**
- * $Id: deploy.js v0.3 2023-08-04 02:41:53 CEST 8.05GB .m0rph $
+ * $Id: deploy.js v0.4 2023-08-04 14:21:08 CEST 8.05GB .m0rph $
  * 
  *
  * description:
@@ -18,7 +18,10 @@
 
 import {c} from '/modules/colors.js';
 import {d} from '/modules/datetime.js';
-import {a} from '/modules/arguments.js';
+import {
+   has_count,
+   is_string
+} from '/modules/arguments.js';
 
 export function autocomplete(data, args) {
    return [...data.servers];
@@ -28,120 +31,127 @@ export async function main(ns) {
 
    'use strict';
 
-   const mns = {
+   /**
+    * Error exit handler.
+    * 
+    * @param {string}   msg   Error message.
+    */
+   function exit (msg) {
+      ns.tprintf(`${c.red}ERROR: ${msg} Exiting !!!${c.reset}`);
+      ns.exit();
+   }
+   
+   /**
+    * Looper logger. We need a grepable logfile for later analysis.
+    * 
+    * @param {string}   data  Text that is written to the logfile.
+    * @param {string}   mode  File open mode >> w = create new file, a = append to file.
+    */
+   function log (data, mode) {
+      const m = (mode) ? mode : 'w';
+      ns.print(`${c.cyan}${data}${c.reset}`);
+      ns.write(logfile, data, m);
+   }
 
-      /**
-       * Method: Initialize looper.
-       */
-      init () {
 
-         if (a.count(ns.args, 0)) this.exit('No target passed');
+   /**
+    * At first the parameter validation.
+    */
+   has_count(ns.args, 0) ? exit('No target passed') : null;
 
-         ns.args.forEach(arg => {
+   has_count(ns.args, 1)
+      ? is_string(ns.args[0]) 
+         ? ns.serverExists(ns.args[0]) ? null : exit(`Attack target ${ns.args[0]} does not exist.`)
+         : exit(`ERROR :: ${ns.args[0]} :: String expected.`)
+      : null;
 
-            if (!a.str(arg))           this.exit(`ERROR ARGS :: ${arg} :: String expected.`);
-            if (!ns.serverExists(arg)) this.exit(`Target ${arg} does not exist.`);
-         });
+   has_count(ns.args, 2)
+      ? is_string(ns.args[1]) 
+         ? ns.serverExists(ns.args[1]) ? null : exit(`Master target ${ns.args[1]} does not exist.`)
+         : exit(`ERROR :: ${ns.args[1]} :: String expected.`)
+      : null;
 
-         this.target  = ns.args[0];
-         this.looper  = ns.args[1] ? ns.args[1] : undefined;
-         this.files   = ['/looper/hack.js', '/looper/grow.js', '/looper/weaken.js', '/modules/colors.js', '/modules/arguments.js', '/modules/datetime.js'];
-         this.logfile = `/log/looper-deploy.${this.target}.${d.timestamp()}.js`;
-         this.log(
-            `Looper deploy startet at ${d.getdate()}, ${d.gettime()}: ` +
-            `Initializing target data.\n`
-         );
-      },
 
-      /**
-       * Method: No backdoor? No admin rights? OK, let's get'em.
-       */
-      exploit () {
+   /**
+    * Then the initialization section.
+    */
+   const
+      target  = ns.args[0],
+      looper  = ns.args[1] ?? undefined,
+      files   = ['/looper/hack.js', '/looper/grow.js', '/looper/weaken.js', '/modules/colors.js', '/modules/arguments.js', '/modules/datetime.js'],
+      logfile = `/log/looper-deploy.${target}.${d.timestamp()}.js`;
 
-         const h = ns.getServer(this.target);
+   log(
+      `Looper deploy startet at ${d.getdate()}, ${d.gettime()}: ` +
+      `Initializing target data.\n`
+   );
 
-         if (!h.purchasedByPlayer && !h.hasRootAccess) {
 
-            if (h.numOpenPortsRequired > 0) {
+   /**
+    * Main routine: No backdoor? No admin rights? OK, let's get'em.
+    */
+   let h = ns.getServer(target);
 
-               const port_opener = ['BruteSSH', 'FTPCrack', 'HTTPWorm', 'relaySMTP', 'SQLInject'];
-               const open_port   = (port) => {
+   if (!h.purchasedByPlayer && !h.hasRootAccess) {
 
-                  if (ns.fileExists(`${port}.exe`)) {
+      if (h.numOpenPortsRequired > 0) {
 
-                     let msg;
+         const port_opener = ['BruteSSH', 'FTPCrack', 'HTTPWorm', 'relaySMTP', 'SQLInject'];
+         const open_port   = (port) => {
 
-                     try {
-                        ns[port.toLowerCase()](this.target);
-                        msg = `Opening port: Executing ${port}.exe\n`;
-                     }
-                     catch (e) {
-                        msg = `ERROR: ${e}\n`;
-                        ns.tprintf(`${c.red}ERROR: ${e}${reset}`);
-                     }
+            if (ns.fileExists(`${port}.exe`)) {
 
-                     this.log(msg, 'a');
-                  }
-               };
+               let msg;
 
-               port_opener.forEach(open_port);
+               try {
+                  ns[port.toLowerCase()](target);
+                  msg = `Opening port: Executing ${port}.exe\n`;
+               }
+               catch (e) {
+                  msg = `ERROR: ${e}\n`;
+                  ns.tprintf(`${c.red}ERROR: ${e}${reset}`);
+               }
+
+               log(msg, 'a');
             }
+         };
 
-            if (h.openPortCount >= h.numOpenPortsRequired) {
-            
-               ns.nuke(this.target);
-               ns.tprintf(`${c.cyan}Did nuke() ${this.target}. Don't forget the backdoor !!!${c.reset}`);
-               ns.tprintf(`${c.cyan}We're ready for the looper master.${c.reset}`);
-               this.log(`Targed nuked. Don't forget the backdoor!\n`, 'a')
-            }
-            else {
-               ns.tprintf(`${c.red}Cannot nuke() ${this.target}.${c.reset}`);
-            }
-         }
+         port_opener.forEach(open_port);
 
-         if (this.looper) this.files.push('/looper/master.js');
-         // And finally copy the scripts onto the target server.
-         this.log(
-            `Copying looper scripts ... ${ns.scp(this.files, this.looper ? this.looper : this.target) ? 'OK' : 'FAILED'}.` +
-            `\nDeployment finished. ${this.looper ? '' : 'Exiting.'}`,
-            'a'
-         );
+         // After port opening we have to wait a second, because of the nuking afterwards.
+         //ns.tprintf(`${c.cyan}Port opening finished, awaiting hasRootAccess status ... sleeping 5ms${c.reset}`)
+         //await ns.sleep(5000);
+      }
 
-         if (this.looper) {
-            // Deploy a pserv-N ? execute the looper master.
-            ns.deleteServer; // Just a little static RAM feed3r... 2.25GB
-            ns.exec('/looper/master.js', this.looper, 1, ...[this.target, true])
-               ? this.log(`\nExecuting looper master on ${this.looper} to attack ${this.target}.`, 'a')
-               : this.log(`\nError executing looper master on ${this.looper}. Exiting !!!`, 'a');
-         }
-         
-      },
+      // Refetch the server object, due to the opened ports check!
+      h = ns.getServer(target);
 
-
-      /**
-       * Method: Looper logger. We need a grepable logfile for later analysis.
-       * 
-       * @param {string}   data  Text that is written to the logfile.
-       * @param {string}   mode  File open mode >> w = create new file, a = append to file.
-       */
-      log (data, mode) {
-         const m = (mode) ? mode : 'w';
-         ns.print(`${c.cyan}${data}${c.reset}`);
-         ns.write(this.logfile, data, m);
-      },
-
-      /**
-       * Method: Error exit handler.
-       * 
-       * @param {string}   msg   Error message.
-       */
-      exit (msg) {
-         ns.tprintf(`${c.red}${msg} Exiting !!!${c.reset}`);
-         ns.exit();
+      if (h.openPortCount >= h.numOpenPortsRequired) {
+      
+         ns.nuke(target);
+         ns.tprintf(`${c.cyan}Did nuke() ${target}. Don't forget the backdoor !!!${c.reset}`);
+         ns.tprintf(`${c.cyan}We're ready for the looper master.${c.reset}`);
+         log(`Targed nuked. Don't forget the backdoor!\n`, 'a')
+      }
+      else {
+         ns.tprintf(`${c.red}Cannot nuke() ${target}.${c.reset}`);
       }
    }
 
-   mns.init();
-   mns.exploit();
+   if (looper) files.push('/looper/master.js');
+   // And finally copy the scripts onto the target server.
+   log(
+      `Copying looper scripts ... ${ns.scp(files, looper ? looper : target) ? 'OK' : 'FAILED'}.` +
+      `\nDeployment finished. ${looper ? '' : 'Exiting.'}`,
+      'a'
+   );
+
+   if (looper) {
+      // Deploy a pserv-N ? execute the looper master.
+      ns.deleteServer; // Just a little static RAM feed3r... 2.25GB
+      ns.exec('/looper/master.js', looper, 1, ...[target, true])
+         ? log(`\nExecuting looper master on ${looper} to attack ${target}.`, 'a')
+         : log(`\nError executing looper master on ${looper}. Exiting !!!`, 'a');
+   }
 }
 
