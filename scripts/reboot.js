@@ -59,7 +59,7 @@ export async function main(ns) {
 
       if (host != 'home') {
 
-         const h = ns.getServer(host);
+         let h = ns.getServer(host);
 
          if (!h.purchasedByPlayer) {
 
@@ -81,6 +81,9 @@ export async function main(ns) {
                };
    
                port_opener.forEach(open_port);
+
+               // Refetch server object due to the opened ports.
+               h = ns.getServer(host);
             }
    
             if (h.hasAdminRights) {
