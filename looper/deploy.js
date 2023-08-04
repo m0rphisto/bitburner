@@ -1,5 +1,5 @@
 /**
- * $Id: deploy.js v0.3 2023-08-03 19:51:34 CEST 5.90GB .m0rph $
+ * $Id: deploy.js v0.3 2023-08-04 02:41:53 CEST 8.05GB .m0rph $
  * 
  *
  * description:
@@ -109,7 +109,7 @@ export async function main(ns) {
 
          if (this.looper) {
             // Deploy a pserv-N ? execute the looper master.
-            ns.getScriptRam; // Just a little static RAM feed3r...
+            ns.deleteServer; // Just a little static RAM feed3r... 2.25GB
             ns.exec('/looper/master.js', this.looper, 1, ...[this.target, true])
                ? this.log(`\nExecuting looper master on ${this.looper} to attack ${this.target}.`, 'a')
                : this.log(`\nError executing looper master on ${this.looper}. Exiting !!!`, 'a');

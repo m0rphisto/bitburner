@@ -1,5 +1,5 @@
 /**
- * $Id: master.js v0.2 2023-08-03 19:54:49 CEST 4.70GB .m0rph $
+ * $Id: master.js v0.2 2023-08-04 02:40:43 CEST 6.95GB .m0rph $
  * 
  * Description:
  *    This is the looper master, that utilizes looper/{hack,grow,weaken}.js
@@ -135,6 +135,7 @@ export async function main(ns) {
    pid = ns.exec(cmd, base, weaken_threads, ...args);
    ns.print(`${c.cyan}${d.gettime()}: Started pid(${pid}) ${cmd} on ${base}.${c.reset}`);
    await ns.sleep(ns.getWeakenTime(target) * 1.15);
+   ns.deleteServer; // Just a little static RAM feed3r ... 2.25GB
 
    for (;;) {
 
@@ -195,7 +196,4 @@ export async function main(ns) {
          //}
       }
    }
-
-   // OK, and here is our little RAM feeder. :-)
-   ns.getScriptRam;
 }
