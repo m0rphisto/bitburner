@@ -1,5 +1,5 @@
 /** 
- * $Id: reboot.js v0.9 2023-08-03 19:49:23 CEST 6.05GB .m0rph $
+ * $Id: reboot.js v0.9 2023-08-04 02:44:35 CEST 8.30GB .m0rph $
  * 
  * description:
  *    In case of an infinite loop, respectively game crash or augment installation (soft reset)
@@ -57,70 +57,75 @@ export async function main(ns) {
    scanned.forEach(a => ns.scan(a).forEach(b => scanned.add(b)));
    scanned.forEach(host => {
 
-      const h = ns.getServer(host);
+      if (host != 'home') {
 
-      /**
-       * Method: No backdoor? No admin rights? OK, let's get'em.
-       */
-      if (h.numOpenPortsRequired > 0 && !h.hasAdminRights) {
+         const h = ns.getServer(host);
 
-         const port_opener = ['BruteSSH', 'FTPCrack', 'HTTPWorm', 'relaySMTP', 'SQLInject'];
-         const open_port   = (port) => {
+         if (!h.purchasedByPlayer) {
 
-            if (ns.fileExists(`${port}.exe`)) {
-               try {
-                  ns[port.toLowerCase()](h.hostname);
-               } catch (e) {
-                  ns.tprintf(`${c.red}ERROR: ${e}${reset}`);
+            /**
+             * Method: No purchased server; no backdoor? No admin rights? OK, let's get'em.
+             */
+            if (h.numOpenPortsRequired > 0 && !h.hasAdminRights) {
+   
+               const port_opener = ['BruteSSH', 'FTPCrack', 'HTTPWorm', 'relaySMTP', 'SQLInject'];
+               const open_port   = (port) => {
+   
+                  if (ns.fileExists(`${port}.exe`)) {
+                     try {
+                        ns[port.toLowerCase()](h.hostname);
+                     } catch (e) {
+                        ns.tprintf(`${c.red}ERROR: ${e}${reset}`);
+                     }
+                  }
+               };
+   
+               port_opener.forEach(open_port);
+            }
+   
+            if (h.hasAdminRights) {
+               ns.tprintf(`${c.cyan}${h.hostname} already r00ted.${c.reset}`);
+            }
+            else {
+   
+               if (h.openPortCount >= h.numOpenPortsRequired) {
+            
+                  /**
+                   * We have to await the h.hasAdminRights condition !!!
+                   * Otherwise reboot will walk through all hosts and do just one job,
+                   * exploit it, nuke it or start hackit on it.
+                   */
+                  ns.nuke(h.hostname);
+      
+                  ns.tprintf(`${c.magenta}Did nuke() ${h.hostname}. Don't forget the backdoor !!!${c.reset}`);
                }
             }
-         };
-
-         port_opener.forEach(open_port);
-      }
-
-      if (h.openPortCount >= h.numOpenPortsRequired && !h.hasAdminRights) {
-         
-         /**
-          * We have to await the h.hasAdminRights condition !!!
-          * Otherwise reboot will walk through all hosts and do just one job,
-          * exploit it, nuke it or start hackit on it.
-          */
-         ns.nuke(h.hostname);
-
-         ns.tprintf(`${c.magenta}Did nuke() ${h.hostname}. Don't forget the backdoor !!!${c.reset}`);
-      }
-      //else {
-      if (h.hasAdminRights) {
-         ns.tprintf(`${c.green}${h.hostname} already r00ted.${c.reset}`);
-      }
-
-
-      if (h.hasAdminRights) {
-
-         if (h.maxRam > 0) {
-
-            const threads = Math.floor((h.maxRam - h.ramUsed) / ns.getScriptRam(hackit));
-
-            
-            if (! ns.fileExists(hackit, h.hostname)) {
-            
-               ns.tprintf(`${c.cyan}Copying hackit to ${h.hostname} ... ${ns.scp(hackit, h.hostname) ? 'OK' : 'FAILED'}.${c.reset}`);
-            } 
-            
-            if (threads > 0) {
-
-               ns.exec(hackit, h.hostname, threads, target)
-                  ? ns.tprintf(`${c.green}OK, hackit is running on ${h.hostname} and hacking ${target}.${c.reset}`)
-                  : ns.tprintf(`${c.red}ERROR: Could not start hackit ${h.hostname}.${c.reset}`)
-            }
          }
-         else {
-            ns.tprintf(`${c.yellow}WARNING: ${h.hostname} doesn't have any RAM. You should do a targets() run !!!${c.reset}`);
+   
+         if (h.hasAdminRights) {
+   
+            if (h.maxRam > 0) {
+   
+               const threads = Math.floor((h.maxRam - h.ramUsed) / ns.getScriptRam(hackit));
+   
+               if (! ns.fileExists(hackit, h.hostname)) {
+               
+                  ns.tprintf(`${c.cyan}Copying hackit to ${h.hostname} ... ${ns.scp(hackit, h.hostname) ? 'OK' : 'FAILED'}.${c.reset}`);
+               } 
+               
+               if (threads > 0) {
+                  // A little static RAM feeder. :-)
+                  ns.deleteServer; // 2.25GB
+                  //ns.getBitNodeMultipliers; // 4GB
+                  ns.exec(hackit, h.hostname, threads, target)
+                     ? ns.tprintf(`${c.green}OK, hackit is running on ${h.hostname} and hacking ${target}.${c.reset}`)
+                     : ns.tprintf(`${c.red}ERROR: Could not start hackit ${h.hostname}.${c.reset}`)
+               }
+            }
+            else {
+               ns.tprintf(`${c.yellow}WARNING: ${h.hostname} doesn't have any RAM. You should do a targets() run !!!${c.reset}`);
+            }
          }
       }
    });
-
-   // OK, and here is our little RAM feeder. :-)
-   ns.getScriptRam;
 }
