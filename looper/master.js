@@ -47,10 +47,6 @@ export async function main(ns) {
    'use strict';
 
 
-   // At first we need to manipulate the log-window's title bar.
-   ns.setTitle(`.m0rph@${ns.getHostname()}:/looper/master.js ${target}`)
-
-
    /**
     * Error exit handler.
     * 
@@ -131,6 +127,9 @@ export async function main(ns) {
 
 // DEBUG
 //exit(`target: ${target}, base: ${base},  sself: ${sself}, args: ${args}`);
+
+   // At first we need to manipulate the log-window's title bar.
+   ns.setTitle(`.m0rph@${ns.getHostname()}:/looper/master.js ${target}`)
 
 
    let money, sec, cmd, pid = 0;
