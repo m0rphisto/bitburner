@@ -1,5 +1,5 @@
 /**
- * $Id: master.js v0.2 2023-08-04 02:40:43 CEST 6.95GB .m0rph $
+ * $Id: master.js v0.2 2023-08-05 13:55:49 CEST 6.95GB .m0rph $
  * 
  * Description:
  *    This is the looper master, that utilizes looper/{hack,grow,weaken}.js
@@ -45,6 +45,11 @@ export function autocomplete(data, args) {
 export async function main(ns) {
 
    'use strict';
+
+
+   // At first we need to manipulate the log-window's title bar.
+   ns.setTitle(`.m0rph@${ns.getHostname()}:/looper/master.js ${target}`)
+
 
    /**
     * Error exit handler.
