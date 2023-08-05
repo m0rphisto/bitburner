@@ -1,7 +1,7 @@
 
 #                      ~~~ Bitburner ~~~ 
 
-##### [https://danielyxie.github.io/bitburner/](https://danielyxie.github.io/bitburner/)
+###### [https://danielyxie.github.io/bitburner/](https://danielyxie.github.io/bitburner/)
 ###### latest version: v2.4.0
 
 ### This is my first GitHub repository
@@ -20,7 +20,9 @@ Have a lot of fun...
 .m0rph
 
 -- 
-My Love: {Debian,Kali} GNU Linux; /bin/zsh; /usr/bin/perl; ...
-[https://academy.hackthebox.com/m0rphisto/](https://academy.hackthebox.com/m0rphisto/)
-[https://app.hackthebox.com/m0rphisto/](https://app.hackthebox.com/m0rphisto/)
+
+###### My Love: {Debian,Kali} GNU Linux; /bin/zsh; /usr/bin/perl; ...
+
+###### [https://academy.hackthebox.com/m0rphisto/](https://academy.hackthebox.com/m0rphisto/)
+###### [https://app.hackthebox.com/m0rphisto/](https://app.hackthebox.com/m0rphisto/)
 
