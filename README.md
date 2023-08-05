@@ -25,9 +25,9 @@ Have a lot of fun...
 
 -- 
 
-My Love: {Debian,Kali} GNU Linux; /bin/zsh; /usr/bin/perl; ...</small>
+My Love: {Debian,Kali} GNU Linux; /bin/zsh; /usr/bin/perl; ...
 
-[https://academy.hackthebox.com/m0rphisto/](https://academy.hackthebox.com/m0rphisto/)</small>
+https://app.hackthebox.com/m0rphisto/
 
-[https://app.hackthebox.com/m0rphisto/](https://app.hackthebox.com/m0rphisto/)</small>
+https://academy.hackthebox.com/
 
