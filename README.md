@@ -2,9 +2,11 @@
 # ~~~ Bitburner ~~~ 
 
 
+v2.3.2
 https://danielyxie.github.io/bitburner/
 
 latest version: v2.4.0
+https://bitburner-official.github.io/
 
 
 ### This is my first GitHub repository
