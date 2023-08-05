@@ -1,8 +1,11 @@
 
-#                      ~~~ Bitburner ~~~ 
+#            ~~~ Bitburner ~~~ 
+                 :----:
 
 ###### [https://danielyxie.github.io/bitburner/](https://danielyxie.github.io/bitburner/)
 ###### latest version: v2.4.0
+
+
 
 ### This is my first GitHub repository
 
