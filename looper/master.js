@@ -129,7 +129,7 @@ export async function main(ns) {
 //exit(`target: ${target}, base: ${base},  sself: ${sself}, args: ${args}`);
 
    // At first we need to manipulate the log-window's title bar.
-   ns.setTitle(`.m0rph@${ns.getHostname()}:/looper/master.js ${target}`)
+   ns.setTitle(`.m0rph@${ns.getHostname()}:/looper/master.js ${target} ${base}`)
 
 
    let money, sec, cmd, pid = 0;
