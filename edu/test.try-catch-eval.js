@@ -1,5 +1,5 @@
 /**
- * $Id: test.try-catch-eval.js v0.1 2023-08-05 22:56:11 CEST 8.05GB .m0rph $
+ * $Id: test.try-catch-eval.js v0.2 2023-08-05 02:09:10 CEST 6.45GB .m0rph $
  * 
  * @param {NS} ns
  */
@@ -147,7 +147,15 @@ export async function main(ns) {
    AND HERE WE ONLY HAVE VERY LITTLE 24 LINES OF CODE !!!
    WHAT ABOUT HUNDREDs OR THOUSANDs OF SOURCE CODE LINES ???
 
-   In my opinion we HAVE to care about.
+   In my opinion we HAVE to care about, and so SURE I will use
+   dynamic created API calls. OK, I have to keep in mind the static
+   and dynamic allocated RAM amounts, but a
+
+      ns.deleteServer;
+
+   16  [ x 64 = 1024 bits ] characters wasted APIT call copared against
+   227 [ x 64 = 14,528 bits ] waste, only not to get in trouble, THAT is
+   a thing I do care about.
 
 
    So long...
