@@ -131,6 +131,10 @@ export async function main(ns) {
    // At first we need to manipulate the log-window's title bar.
    ns.setTitle(`.m0rph@${ns.getHostname()}:/looper/master.js ${target} ${base}`)
 
+   // For the case the target server has no RAM, we have to trow an error!
+   if (max_ram < 1)
+      exit(`The target's maxRam is at ${ns.formatRam(max_ram)}! You should consider looping local.`)
+
 
    let money, sec, cmd, pid = 0;
 
