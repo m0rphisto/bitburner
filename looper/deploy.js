@@ -96,6 +96,9 @@ export async function main(ns) {
 
       if (h.numOpenPortsRequired > 0) {
 
+            ns.deleteServer; // Just a little 2.25GB static RAM feed3r due to the try-catch 5x ns[port_opener]() ...
+                             // Otherwise we have a static/synamic RAM allocation error
+
          const port_opener = ['BruteSSH', 'FTPCrack', 'HTTPWorm', 'relaySMTP', 'SQLInject'];
          const open_port   = (port) => {
 
@@ -148,7 +151,6 @@ export async function main(ns) {
 
    if (looper) {
       // Deploy a pserv-N ? execute the looper master.
-      ns.deleteServer; // Just a little static RAM feed3r... 2.25GB
       ns.exec('/looper/master.js', looper, 1, ...[target, true])
          ? log(`\nExecuting looper master on ${looper} to attack ${target}.`, 'a')
          : log(`\nError executing looper master on ${looper}. Exiting !!!`, 'a');
