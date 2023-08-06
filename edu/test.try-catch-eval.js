@@ -84,11 +84,11 @@ export async function main(ns) {
    OK, so lets take a look:
 */
    let servers = new Set(['home']);
-   servers.foreach(a => ns.scan(a).forEach(b => b.match('pserv') ?? b.add(a).delete('home')));
+   servers.forEach(a => ns.scan(a).forEach(b => b.match('pserv') ?? b.add(a).delete('home')));
    servers.forEach(target => {
 
       ns.deleteServer; // Just a little 2.25GB static RAM feed3r due to the try-catch 5x ns[port_opener]() ... 
-                       // Otherwise we have a static/synamic RAM allocation error.
+                       // Otherwise we have a static/dynamic RAM allocation error.
 
       const port_opener = ['BruteSSH', 'FTPCrack', 'HTTPWorm', 'relaySMTP', 'SQLInject'];
       const open_port   = (port) => {
