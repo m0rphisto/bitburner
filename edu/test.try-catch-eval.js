@@ -153,7 +153,7 @@ export async function main(ns) {
 
       ns.deleteServer;
 
-   16  [ x 64 = 1024 bits ] characters wasted APIT call copared against
+   16  [ x 64 = 1024 bits ] characters wasted API call compared against
    227 [ x 64 = 14,528 bits ] waste, only not to get in trouble, THAT is
    a thing I do care about.
 
