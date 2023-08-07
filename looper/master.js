@@ -1,5 +1,5 @@
 /**
- * $Id: master.js v0.3 2023-08-05 13:55:49 CEST 6.95GB .m0rph $
+ * $Id: master.js v0.3 2023-08-06 15:46:42 CEST 6.95GB .m0rph $
  * 
  * Description:
  *    This is the looper master, that utilizes looper/{hack,grow,weaken}.js
