@@ -17,7 +17,7 @@
  */
 
 import {c} from '/modules/colors.js';
-import {has_option} from '/modules/colors.js';
+import {has_option} from '/modules/arguments.js';
 
 export async function main(ns) {
 
