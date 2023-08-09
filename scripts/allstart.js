@@ -47,6 +47,7 @@ const
    if (has_option(ns, '-l'))
    {
       ram.forEach(target => {
+         ns.killall(target);
          ns.tprintf(`${c.cyan}Killing running scripts on ${target} and starting local /looper/master.js ${c.reset}`);
          ns.run('/looper/master.js', 1, target);
       });
