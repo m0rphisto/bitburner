@@ -47,21 +47,21 @@ const
    if (has_option(ns, '-l'))
    {
       ram.forEach(target => {
-         ns.tprintf(`${c.cyan}Starting /looper/master.js ${target}${c.reset}`);
+         ns.tprintf(`${c.cyan}Killing running scripts on ${target} and starting local /looper/master.js ${c.reset}`);
          ns.run('/looper/master.js', 1, target);
       });
 
       for (let nram of no_ram)
       {
-         ns.tprintf(`${c.cyan}Starting /looper/weaken.js ${nram} -t ${threads}${c.reset}`);
+         ns.tprintf(`${c.cyan}Starting local /looper/weaken.js ${nram} -t ${threads}${c.reset}`);
          ns.run('/looper/weaken.js', threads, nram);
          await ns.sleep(1000);
 
-         ns.tprintf(`${c.cyan}Starting /looper/grow.js ${nram} -t ${threads}${c.reset}`);
+         ns.tprintf(`${c.cyan}Starting local /looper/grow.js ${nram} -t ${threads}${c.reset}`);
          ns.run('/looper/grow.js', threads, nram);
          await ns.sleep(1000);
       
-         ns.tprintf(`${c.cyan}Starting /looper/mhack.js ${nram} -t ${threads}${c.reset}`);
+         ns.tprintf(`${c.cyan}Starting local /looper/mhack.js ${nram} -t ${threads}${c.reset}`);
          ns.run('/looper/mhack.js', threads, nram);
          await ns.sleep(1000);
       }
