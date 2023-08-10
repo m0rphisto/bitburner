@@ -11,6 +11,7 @@
  */
 import {c} from '/modules/colors.js';
 import {has_count, is_string} from '/modules/arguments.js';
+export function autocomplete(data, args) { return [...data.servers] }
 export async function main(ns) {
 
    if (has_count(ns.args, 1) && is_string(ns.args[0]) && ns.serverExists(ns.args[0]))
