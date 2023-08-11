@@ -1,5 +1,5 @@
 /**
- * $Id: allstart.js 2023-08-09 20:40:15 3.90GB .m0rph $
+ * $Id: allstart.js v0.4 2023-08-11 08:56:56 4.55GB .m0rph $
  * 
  * description:
  *    Restarts all looper scripts on hacked and on purchased servers.
@@ -48,23 +48,29 @@ const
    {
       ram.forEach(target => {
          ns.killall(target);
-         ns.tprintf(`${c.cyan}Killing running scripts on ${target} and starting local /looper/master.js ${c.reset}`);
+         if (!ns.hasRootAccess(target)) ns.run('/looper/deploy.js', 1, target);
+         ns.tprintf(`${c.cyan}Killing running scripts on ${target} and starting local /looper/master.js.${c.reset}`);
          ns.run('/looper/master.js', 1, target);
       });
 
       for (let nram of no_ram)
       {
-         ns.tprintf(`${c.cyan}Starting local /looper/weaken.js ${nram} -t ${threads}${c.reset}`);
-         ns.run('/looper/weaken.js', threads, nram);
-         await ns.sleep(1000);
+         ns.killall(nram);
+         if (!ns.hasRootAccess(nram)) ns.run('/looper/deploy.js', 1, nram);
+         if (ns.hasRootAccess(nram)
+         {
+            ns.tprintf(`${c.cyan}Starting local /looper/weaken.js ${nram} -t ${threads}${c.reset}`);
+            ns.run('/looper/weaken.js', threads, nram);
+            await ns.sleep(1000);
 
-         ns.tprintf(`${c.cyan}Starting local /looper/grow.js ${nram} -t ${threads}${c.reset}`);
-         ns.run('/looper/grow.js', threads, nram);
-         await ns.sleep(1000);
+            ns.tprintf(`${c.cyan}Starting local /looper/grow.js ${nram} -t ${threads}${c.reset}`);
+            ns.run('/looper/grow.js', threads, nram);
+            await ns.sleep(1000);
       
-         ns.tprintf(`${c.cyan}Starting local /looper/mhack.js ${nram} -t ${threads}${c.reset}`);
-         ns.run('/looper/mhack.js', threads, nram);
-         await ns.sleep(1000);
+            ns.tprintf(`${c.cyan}Starting local /looper/mhack.js ${nram} -t ${threads}${c.reset}`);
+            ns.run('/looper/mhack.js', threads, nram);
+            await ns.sleep(1000);
+         }
       }
    }
 
@@ -72,8 +78,13 @@ const
    {
       for (let i = 0; i < 25; i++)
       {
-         ns.tprintf(`${c.cyan}pserv-${i}: Starting /scripts/hackit.js ecorp -t ${pthreads}${c.reset}`);
-         ns.exec('/scripts/hackit.js', `pserv-${i}`, pthreads, 'ecorp');
+         ns.tprintf(`${c.cyan}pserv-${i}: Starting /scripts/hackit.js phantasy -t ${pthreads}${c.reset}`);
+         let pid = ns.exec('/scripts/hackit.js', `pserv-${i}`, pthreads, 'phantasy');
+         if (pid == 0)
+         {
+            ns.tprintf(`${c.red}Could not start hackit. Exiting!!!${c.reset}`);
+            ns.exit();
+         }
       }
    }
 }
