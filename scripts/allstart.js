@@ -1,5 +1,5 @@
 /**
- * $Id: allstart.js v0.4 2023-08-11 08:56:56 4.55GB .m0rph $
+ * $Id: allstart.js v0.5 2023-08-13 01:22:27 5.25GB .m0rph $
  * 
  * description:
  *    Restarts all looper scripts on hacked and on purchased servers.
@@ -10,7 +10,8 @@
  *    -l Start looper scripts.
  *    -p Start purchased server scripts.
  * 
- *    And don't forget to adjust the threads settings!
+ *    And don't forget to adjust the threads settings due to the
+ *    local RAM amount!
  * 
  * 
  * @param {NS} ns The Netscript API.
@@ -25,9 +26,10 @@ export async function main(ns) {
 
 const
    threads = 512,
-   pthreads = 3212,
+   target  = 'megacorp',
    ram =
       [
+         // Self-targeting hosts ...
          'n00dles', 'foodnstuff', 'sigma-cosmetics', 'joesguns', 'hong-fang-tea', 'harakiri-sushi', 'iron-gym', 'max-hardware',
          'CSEC', 'nectar-net', 'zer0', 'silver-helix', 'phantasy', 'neo-net', 'omega-net', 'netlink', 'avmnite-02h',
          'the-hub', 'summit-uni', 'zb-institute', 'I.I.I.I', 'rothman-uni', 'catalyst', 'millenium-fitness',
@@ -37,28 +39,44 @@ const
       ],
    no_ram =
       [
-         'johnson-ortho',
-         'computek', 'crush-fitness', 'syscore', 'galactic-cyber', 'aerocorp', 'snap-fitness', 'deltaone',
+         // Externally attacked hosts ...
+         'johnson-ortho', 'computek', 'crush-fitness', 'syscore', 'galactic-cyber', 'aerocorp', 'snap-fitness', 'deltaone',
          'defcomm', 'zeus-med', 'icarus', 'infocomm', 'nova-med', 'taiyang-digital', 'zb-def', 'applied-energetics',
          'stormtech', '4sigma', 'kuai-gong', 'b-and-a', 'nwo', 'clarkinc', 'The-Cave', 'ecorp', 'fulcrumassets',
          'megacorp'
       ];
 
+
+   
    if (has_option(ns, '-l'))
    {
-      ram.forEach(target => {
-         ns.killall(target);
-         if (!ns.hasRootAccess(target)) ns.run('/looper/deploy.js', 1, target);
-         ns.tprintf(`${c.cyan}Killing running scripts on ${target} and starting local /looper/master.js.${c.reset}`);
-         ns.run('/looper/master.js', 1, target);
+      ns.killall(); // At first we kill all local running scripts ...
+
+      ram.forEach(host => {
+         if (
+            // ... and then we check the self-targeting hosts.
+            ns.isRunning('/looper/weaken.js', host) ||
+            ns.isRunning('/looper/grow.js',   host) ||
+            ns.isRunning('/looper/hack.js',   host)
+         ) {
+            ns.tprintf(`${c.white}One of the H/G/W scripts active on ${host}. Trying to kill it ... ${ns.killall(host) ? 'OK' : 'FAILED'}.${c.reset}`);
+         } 
+
+         // Only just in case the hosts wasn't already deployed.
+         if (!ns.hasRootAccess(host)) ns.run('/looper/deploy.js', 1, host);
+
+         // Finally get them running again.
+         ns.tprintf(`${c.cyan}Starting local /looper/master.js.${c.reset}`);
+         ns.run('/looper/master.js', 1, host);
       });
 
       for (let nram of no_ram)
       {
-         ns.killall(nram);
+         // Only just in case the hosts wasn't already r00ted.
          if (!ns.hasRootAccess(nram)) ns.run('/looper/deploy.js', 1, nram);
-         if (ns.hasRootAccess(nram)
+         if ( ns.hasRootAccess(nram))
          {
+            // Finally get them locally running again.
             ns.tprintf(`${c.cyan}Starting local /looper/weaken.js ${nram} -t ${threads}${c.reset}`);
             ns.run('/looper/weaken.js', threads, nram);
             await ns.sleep(1000);
@@ -78,11 +96,22 @@ const
    {
       for (let i = 0; i < 25; i++)
       {
-         ns.tprintf(`${c.cyan}pserv-${i}: Starting /scripts/hackit.js phantasy -t ${pthreads}${c.reset}`);
-         let pid = ns.exec('/scripts/hackit.js', `pserv-${i}`, pthreads, 'phantasy');
+         // Purchased server already deployed?
+         if (! ns.fileExists(`/looper/weaken.js`, `pserv-${i}`)) ns.scp('/looper/weaken.js', `pserv-${i}`);
+         if (! ns.fileExists(`/looper/grow.js`,   `pserv-${i}`)) ns.scp('/looper/grow.js',   `pserv-${i}`);
+         if (! ns.fileExists(`/looper/hack.js`,   `pserv-${i}`)) ns.scp('/looper/hack.js',   `pserv-${i}`);
+         if (! ns.fileExists(`/looper/master.js`, `pserv-${i}`)) ns.scp('/looper/master.js', `pserv-${i}`);
+
+         // Any running scripts?
+         ns.killall(`pserv-${i}`);
+
+         // OK, starting the looper master.
+         ns.tprintf(`${c.cyan}pserv-${i}: Starting /looper/master.js ${target} true${c.reset}`);
+         let pid = ns.exec('/looper/master.js', `pserv-${i}`, 1, ...[target, true]);
+
          if (pid == 0)
          {
-            ns.tprintf(`${c.red}Could not start hackit. Exiting!!!${c.reset}`);
+            ns.tprintf(`${c.red}Could not start the looper master. Exiting!!!${c.reset}`);
             ns.exit();
          }
       }
