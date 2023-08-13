@@ -55,9 +55,9 @@ const
       ram.forEach(host => {
          if (
             // ... and then we check the self-targeting hosts.
-            ns.isRunning('/looper/weaken.js', host) ||
-            ns.isRunning('/looper/grow.js',   host) ||
-            ns.isRunning('/looper/hack.js',   host)
+            ns.isRunning('/looper/weaken.js', host, '') ||
+            ns.isRunning('/looper/grow.js',   host, '') ||
+            ns.isRunning('/looper/hack.js',   host, '')
          ) {
             ns.tprintf(`${c.white}One of the H/G/W scripts active on ${host}. Trying to kill it ... ${ns.killall(host) ? 'OK' : 'FAILED'}.${c.reset}`);
          } 
@@ -66,7 +66,7 @@ const
          if (!ns.hasRootAccess(host)) ns.run('/looper/deploy.js', 1, host);
 
          // Finally get them running again.
-         ns.tprintf(`${c.cyan}Starting local /looper/master.js.${c.reset}`);
+         ns.tprintf(`${c.cyan}Starting local /looper/master.js for ${host}.${c.reset}`);
          ns.run('/looper/master.js', 1, host);
       });
 
@@ -96,11 +96,17 @@ const
    {
       for (let i = 0; i < 25; i++)
       {
-         // Purchased server already deployed?
-         if (! ns.fileExists(`/looper/weaken.js`, `pserv-${i}`)) ns.scp('/looper/weaken.js', `pserv-${i}`);
-         if (! ns.fileExists(`/looper/grow.js`,   `pserv-${i}`)) ns.scp('/looper/grow.js',   `pserv-${i}`);
-         if (! ns.fileExists(`/looper/hack.js`,   `pserv-${i}`)) ns.scp('/looper/hack.js',   `pserv-${i}`);
-         if (! ns.fileExists(`/looper/master.js`, `pserv-${i}`)) ns.scp('/looper/master.js', `pserv-${i}`);
+         [
+            '/modules/colors.js', '/modules/arguments.js', '/modules/datetime.js',
+            '/looper/weaken.js', '/looper/grow.js', '/looper/hack.js', '/looper/master.js'
+         ].forEach(file => {
+            if (!ns.fileExists(file, `pserv-${i}`))
+            {
+               // Purchased server already deployed?
+               ns.tprintf(`Copying ${file} to pserv-${i}`);
+               ns.scp(file, `pserv-${i}`);
+            }
+         });
 
          // Any running scripts?
          ns.killall(`pserv-${i}`);
@@ -110,10 +116,7 @@ const
          let pid = ns.exec('/looper/master.js', `pserv-${i}`, 1, ...[target, true]);
 
          if (pid == 0)
-         {
-            ns.tprintf(`${c.red}Could not start the looper master. Exiting!!!${c.reset}`);
-            ns.exit();
-         }
+            ns.tprintf(`${c.red}Could not start the looper master.${c.reset}`);
       }
    }
 }
