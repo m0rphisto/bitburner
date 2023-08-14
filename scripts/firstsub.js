@@ -1,12 +1,12 @@
 /** 
- * $Id: firstsub.js v0.1 2023-08-10 17:32:04 CEST 4.75GB .m0rph $
+ * $Id: firstsub.js v0.2 2023-08-14 21:27:30 CEST 4.75GB .m0rph $
  * 
  * description:
  *    After augmentation installation we have to start at the beginning,
  *    where we want to 0wn the null port boxes.
  * 
  *    -p [012] Ports to open
- *    -t       Threads for HGW.
+ *    -r       Threads for HGW. !!! Cannot use -t, because the system uses it for threads too !!!
  * 
  * @param {NS} ns
  *             ns.args[0]  string   Hostname of target server
@@ -28,7 +28,7 @@ export async function main(ns) {
       grow    = '/looper/grow.js',
       hack    = '/looper/mhack.js',
       ports   = has_option(ns, '-p') ? get_option(ns, '-p') : 0,
-      threads = has_option(ns, '-t') ? get_option(ns, '-t') : 1,
+      threads = has_option(ns, '-r') ? get_option(ns, '-r') : 1,
       hosts   = {
          0:[
             'n00dles',  'foodnstuff', 'sigma-cosmetics', 'joesguns',
@@ -74,9 +74,13 @@ export async function main(ns) {
          ns.tprintf(`${c.magenta}Did start weaken(), grow() and mhack() for ${host}.${c.reset}`);
       }
 
-      shell(`connect ${host}; backdoor`);
-      await ns.sleep(5000);
-      shell(`home`);
+      if (ports == 0)
+      {
+         // Only null port hosts are directly connectable, except nectar-net.
+         shell(`connect ${host}; backdoor`);
+         await ns.sleep(5000);
+         shell(`home`);
+      }
 
       ns.tprintf(`${c.magenta}And finaly installed the backdoor on ${host}.${c.reset}`);
    }
