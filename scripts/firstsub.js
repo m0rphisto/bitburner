@@ -82,22 +82,22 @@ export async function main(ns) {
             // Only hosts in home's subnet are directly connectable.
 
             case 0:
-               host = `${host == 'nectar-net'    ? 'sigma-cosmetics; connect nectar-net'   : host}`;
+               host = host == 'nectar-net'    ? 'sigma-cosmetics; connect nectar-net'   : host;
                break;
             case 1:
-               host = `${host == 'max-hardware'  ? 'sigma-cosmetics; connect max-hardware' : host}`;
-               host = `${host == 'zer0'          ? 'hong-fang-tea; connect zer0'           : host}`;
-               host = `${host == 'CSEC'          ? 'iron-gym; connect CSEC'                : host}`;
-               host = `${host == 'neo-net'       ? 'CSEC; connect neo-net'                 : host}`;
+               host = host == 'max-hardware'  ? 'sigma-cosmetics; connect max-hardware' : host;
+               host = host == 'zer0'          ? 'hong-fang-tea; connect zer0'           : host;
+               host = host == 'CSEC'          ? 'iron-gym; connect CSEC'                : host;
+               host = host == 'neo-net'       ? 'CSEC; connect neo-net'                 : host;
                break;
             case 2:
-               host = `${host == 'silver-helix'  ? 'max-hardware; connect silver-helix'    : host}`;
-               host = `${host == 'phantasy'      ? 'phantasy; connect neo-net'             : host}`;
-               host = `${host == 'omega-net'     ? 'nectar-net; connect omega-net'         : host}`;
-               host = `${host == 'avmnite-02h'   ? 'omega-net; connect avmnite-02h'        : host}`;
-               host = `${host == 'johnson-ortho' ? 'neo-net; connect johnson-ortho'        : host}`;
-               host = `${host == 'the-hub'       ? 'silver-helix; connect the-hub'         : host}`;
-               host = `${host == 'crush-fitness' ? 'neo-net; connect crush-fitness'        : host}`;
+               host = host == 'silver-helix'  ? 'max-hardware; connect silver-helix'    : host;
+               host = host == 'phantasy'      ? 'phantasy; connect neo-net'             : host;
+               host = host == 'omega-net'     ? 'nectar-net; connect omega-net'         : host;
+               host = host == 'avmnite-02h'   ? 'omega-net; connect avmnite-02h'        : host;
+               host = host == 'johnson-ortho' ? 'neo-net; connect johnson-ortho'        : host;
+               host = host == 'the-hub'       ? 'silver-helix; connect the-hub'         : host;
+               host = host == 'crush-fitness' ? 'neo-net; connect crush-fitness'        : host;
                break;
          }
 
