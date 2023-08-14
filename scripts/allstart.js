@@ -1,5 +1,5 @@
 /**
- * $Id: allstart.js v0.5 2023-08-13 01:22:27 5.25GB .m0rph $
+ * $Id: allstart.js v0.6 2023-08-14 20:31:58 5.25GB .m0rph $
  * 
  * description:
  *    Restarts all looper scripts on hacked and on purchased servers.
@@ -64,10 +64,14 @@ const
 
          // Only just in case the hosts wasn't already deployed.
          if (!ns.hasRootAccess(host)) ns.run('/looper/deploy.js', 1, host);
-
-         // Finally get them running again.
-         ns.tprintf(`${c.cyan}Starting local /looper/master.js for ${host}.${c.reset}`);
-         ns.run('/looper/master.js', 1, host);
+         if ( ns.hasRootAccess(host))
+         {
+            // Finally get them running again.
+            ns.tprintf(`${c.cyan}Starting local /looper/master.js for ${host}.${c.reset}`);
+            ns.run('/looper/master.js', 1, host);
+         }
+         else
+            ns.tprintf(`${c.magenta}No root access to ${host}, so not starting looper master !!!${c.reset}`);
       });
 
       for (let nram of no_ram)
@@ -89,6 +93,8 @@ const
             ns.run('/looper/mhack.js', threads, nram);
             await ns.sleep(1000);
          }
+         else
+            ns.tprintf(`${c.magenta}No root access to ${nram}, so not starting looper master !!!${c.reset}`)
       }
    }
 
@@ -108,15 +114,20 @@ const
             }
          });
 
-         // Any running scripts?
-         ns.killall(`pserv-${i}`);
+         if (ns.hasRootAccess(target))
+         {
+            // Any running scripts?
+            ns.killall(`pserv-${i}`);
 
-         // OK, starting the looper master.
-         ns.tprintf(`${c.cyan}pserv-${i}: Starting /looper/master.js ${target} true${c.reset}`);
-         let pid = ns.exec('/looper/master.js', `pserv-${i}`, 1, ...[target, true]);
+            // OK, starting the looper master.
+            ns.tprintf(`${c.cyan}pserv-${i}: Starting /looper/master.js ${target} true${c.reset}`);
+            let pid = ns.exec('/looper/master.js', `pserv-${i}`, 1, ...[target, true]);
 
-         if (pid == 0)
-            ns.tprintf(`${c.red}Could not start the looper master.${c.reset}`);
+            if (pid == 0)
+               ns.tprintf(`${c.red}Could not start the looper master.${c.reset}`);
+         }
+         else
+            ns.tprintf(`${c.magenta}No root access to ${target}, so not starting looper master !!!${c.reset}`)
       }
    }
 }
