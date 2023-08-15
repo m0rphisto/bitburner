@@ -1,62 +1,89 @@
 /** 
- * Id: purchase.js v0.3 2023-08-09 20:54:45 6.60GB .m0prh $
+ * Id: purchase.js v0.5 2023-08-15 19:40:16 6.45GB .m0prh $
  * 
- *  pserv-maxRam: 2 ** 20 == 1049576 
+ * Note:
+ *    Script usable AFTER the first home server RAM upgrade !!!
  * 
- * @param {NS} ns
- *             ns.args[0]  number   RAM size
- *             ns.args[1]  string   Target server (MUST be a valid hostname)
+ *    pserv-maxRam: 2 ** 20 == 1049576 
+ * 
+ * @param {NS}       ns    The Netscript API.
+ * @param {number}   ram?  Optional: RAM size (default size 8192GB)
  */
+
+import {c} from '/modules/colors.js';
+
 export async function main(ns) {
 
-   if (ns.args.length > 0) {
-      if (
-         typeof ns.args[0] === 'number' && 
-         typeof ns.args[1] === 'string' &&
-         ns.serverExists(ns.args[1])
-      ) {
-         const
-            hackit    = '/scripts/hackit.js',
-            ram       = ns.args[0],
-            target    = ns.args[1],
-            scriptram = ns.getScriptRam(hackit),
-            threads   = Math.floor(ram / scriptram), // Just cut the fraction ... (64.803 -> 64)
-            cost      = ns.getPurchasedServerCost(ram),
-            limit     = ns.getPurchasedServerLimit(),
-            buyed     = ns.getPurchasedServers();
-         
-         let i = 0;
-         while (i < limit && buyed != limit)
+   ns.tail();
+
+   const
+      master   = '/looper/master.js',
+      files    = [
+         '/modules/colors.js', '/modules/datetime.js', 'modules/arguments.js',
+         '/looper/weaken.js', '/looper/grow.js', '/looper/hack.js', master
+      ],
+      ram      = ns.args[0] ?? 8192,
+      cost     = ns.getPurchasedServerCost(ram); // 0.25GB
+
+   /**
+    * At first we purchase the servers.
+    */
+      
+   let i = 0;
+   while (i < ns.getPurchasedServerLimit()) // 0.05GB
+   {
+      let money = ns.getServerMoneyAvailable('home'); // 0.1GB
+      // Continously try to purchase a server until we've reached the
+      // maximum amount of servers.
+      if (money > cost)
+      {
+         let hostname = ns.purchaseServer(`pserv-${i}`, ram); // 2.25GB
+
+         if (hostname == '')
          {
-            let money = ns.getServerMoneyAvailable('home');
-            // Continously try to purchase a server until we've reached the
-            // maximum amount of servers.
-            if (money > cost)
-            {
-               let hostname = ns.purchaseServer(`pserv-${i++}`, ram);
-               ns.scp(hackit, hostname);
-               ns.exec(hackit, hostname, threads, target);
-               ns.printf(`SUCCESS :: Purchased ${hostname} is running and hacking ${target}.`)
-            }
-            else
-            {
-               ns.printf(`SeverCost is at ${ns.formatNumber(cost)}. Not enough money!`); 
-            }
-
-            // We need to wait for a second, otherwise the script will
-            // fall into an infinite loop and the game will crash!
-            await ns.sleep(1000);
+            ns.printf(`${c.red}Failed to purchase server ram(${ram}) !!!${c.reset}`);
+            ns.exit();
          }
-
-      } else {
-         ns.tprint(
-            "ERROR ARGS :: "+
-               "\n\targs[0]->(NUMBER || valid RAM size),"+
-               "\n\targs[1]->(STRING || valid hostname)."+
-               "\n\nExiting !!!"
-         );
+         else
+            i++;
       }
-   } else {
-      ns.tprint('ERROR ARGS :: No arguments passed. Exiting !!!');
+      else
+         ns.printf(`${c.white}SeverCost is at ${ns.formatNumber(cost)}. Not enough money. Waiting ...${c.reset}`); 
+
+      // We need to wait for a second, otherwise the script will
+      // fall into an infinite loop and the game will crash!
+      await ns.sleep(1000);
    }
+
+   /**
+    * OK, we should now have 25 purchased servers, and we have 25 servers with 0.00GB RAM
+    * on the network which make sense to attack. So we can let exactly one purchased server
+    * attack one null RAMmer. ;-)
+    */
+   i = 0;
+   let no_ram = new Set(['home']);
+   no_ram.forEach(a => ns.scan(a).forEach(b => no_ram.add(b).delete('home'))); // 0.2GB
+   no_ram.forEach(a => ns.getServerMaxRam(a) > 0 && no_ram.delete(a)); // 0.05GB
+   no_ram.delete('The-Cave'); // Has 0GB but $0 max also
+   no_ram.delete('darkweb');  // Has 0GB but $0 max also
+   no_ram.forEach(nram => {
+
+      // Purchased server already deployed?
+      ns.scp(files, `pserv-${i}`); // 0.6GB
+
+      if (ns.hasRootAccess(nram)) // 0.05GB
+      {
+         // OK, starting the looper master.
+         ns.printf(`${c.cyan}pserv-${i}: Starting ${master} ${nram} true${c.reset}`);
+         let pid = ns.exec(master, `pserv-${i}`, 1, ...[nram, true]); // 1.3GB
+
+         if (pid == 0)
+            ns.printf(`${c.red}Could not start the looper master.${c.reset}`);
+         
+      }
+      else
+         ns.printf(`${c.magenta}No root access to ${nram}, so not starting looper master !!!${c.reset}`)
+
+      i++;
+   });
 }
