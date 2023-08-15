@@ -1,5 +1,5 @@
 /** 
- * $Id: firstsub.js v0.3 2023-08-15 07:51:37 CEST 4.80GB .m0rph $
+ * $Id: firstsub.js v0.3 2023-08-15 12:28:37 CEST 4.80GB .m0rph $
  * 
  * description:
  *    After augmentation installation we have to start at the beginning,
@@ -8,17 +8,23 @@
  *    -p [012] Ports to open
  *    -r       Threads for HGW. !!! Cannot use -t, because the system uses it for threads too !!!
  * 
+ * Note:
+ *    With every new starting BitNode the network toplogy changes !!!
+ *    So we have to rewrite this script.
+ * 
  * @param {NS} ns
  *             ns.args[0]  string   Hostname of target server
  */
 
 
 import {c} from '/modules/colors.js';
-import {has_option, get_option} from '/modules/arguments.js';
+import {get_option} from '/modules/arguments.js';
 
 export async function main(ns) {
 
    'use strict';
+
+   ns.tail();
 
    // Greetings new run ...
    const
@@ -27,22 +33,31 @@ export async function main(ns) {
       weaken  = '/looper/weaken.js',
       grow    = '/looper/grow.js',
       hack    = '/looper/mhack.js',
-      ports   = has_option(ns, '-p') ? get_option(ns, '-p') : 0,
-      threads = has_option(ns, '-r') ? get_option(ns, '-r') : 1,
+      ports   = get_option(ns, '-p') ?? 0,
+      threads = get_option(ns, '-r') ?? 1,
       hosts   = {
          0:[
-            'n00dles',  'foodnstuff', 'sigma-cosmetics', 'joesguns',
-            'hong-fang-tea', 'harakiri-sushi', 'nectar-net',
+            'n00dles',  'foodnstuff', 'sigma-cosmetics', 'joesguns', 'hong-fang-tea', 'nectar-net', 'harakiri-sushi'
          ],
          1: [
-            'iron-gym', 'max-hardware', 'CSEC',
-            'zer0', 'neo-net',
+            'max-hardware', 'CSEC', 'zer0', 'neo-net', 'iron-gym'
          ],
          2: [
-            'silver-helix', 'phantasy', 'omega-net', 'avmnite-02h',
-            'johnson-ortho', 'the-hub', 'crush-fitness',
+            'omega-net', 'the-hub', 'johnson-ortho', 'crush-fitness', 'avmnite-02h', 'silver-helix', 'phantasy'
+         ],
+         3: [
+            'summit-uni', 'computek', 'catalyst', 'netlink', 'rothman-uni', 'I.I.I.I'
          ]
+      },
+      sleep_time = {
+         0: 1000,
+         1: 3000,
+         2: 6000,
+         3: 9000
       };
+
+   //ns.tprintf(`ports: ${ports}, threads: ${threads}`)
+   //ns.exit();
 
    //scanned.forEach(a => ns.scan(a).forEach(b => scanned.add(b).delete('home')));
    for (let i = 0; i < hosts[ports].length; i++)
@@ -51,12 +66,14 @@ export async function main(ns) {
       
       if (!ns.hasRootAccess(host))
       {
+         ns.printf(`Opening ports`)
          if (ns.fileExists('BruteSSH.exe'))  ns.brutessh(host);
          if (ns.fileExists('FTPCrack.exe'))  ns.ftpcrack(host);
          if (ns.fileExists('HTTPWorm.exe'))  ns.httpworm(host);
          if (ns.fileExists('relaySMTP.exe')) ns.relaysmtp(host);
          if (ns.fileExists('SQLInject.exe')) ns.sqlinject(host);
 
+         ns.printf(`Executin nuke()`)
          ns.nuke(host);
       }
 
@@ -84,31 +101,39 @@ export async function main(ns) {
          switch (ports)
          {
             // Only hosts in home's subnet are directly connectable.
-
             case 0:
-               cmd = host == 'nectar-net'    ? 'sigma-cosmetics; connect nectar-net'   : host;
-               break;
+               if (host == 'nectar-net')    { cmd = 'hong-fang-tea; connect nectar-net';    break }
             case 1:
-               cmd = host == 'max-hardware'  ? 'sigma-cosmetics; connect max-hardware' : host;
-               cmd = host == 'zer0'          ? 'hong-fang-tea; connect zer0'           : host;
-               cmd = host == 'CSEC'          ? 'iron-gym; connect CSEC'                : host;
-               cmd = host == 'neo-net'       ? 'CSEC; connect neo-net'                 : host;
-               break;
+               if (host == 'max-hardware')  { cmd = 'n00dles; connect max-hardware';        break }
+               if (host == 'zer0')          { cmd = 'joesguns; connect zer0';               break }
+               if (host == 'CSEC')          { cmd = 'foodnstuff; connect CSEC';             break }
+               if (host == 'neo-net')       { cmd = 'zer0; connect neo-net';                break }
             case 2:
-               cmd = host == 'silver-helix'  ? 'max-hardware; connect silver-helix'    : host;
-               cmd = host == 'phantasy'      ? 'phantasy; connect neo-net'             : host;
-               cmd = host == 'omega-net'     ? 'nectar-net; connect omega-net'         : host;
-               cmd = host == 'avmnite-02h'   ? 'omega-net; connect avmnite-02h'        : host;
-               cmd = host == 'johnson-ortho' ? 'neo-net; connect johnson-ortho'        : host;
-               cmd = host == 'the-hub'       ? 'silver-helix; connect the-hub'         : host;
-               cmd = host == 'crush-fitness' ? 'neo-net; connect crush-fitness'        : host;
-               break;
+               if (host == 'silver-helix')  { cmd = 'nectar-net; connect silver-helix';     break }
+               if (host == 'phantasy')      { cmd = 'nectar-net; connect phantasy';         break }
+               if (host == 'omega-net')     { cmd = 'CSEC; connect omega-net';              break }
+               if (host == 'avmnite-02h')   { cmd = 'neo-net; connect avmnite-02h';         break }
+               if (host == 'johnson-ortho') { cmd = 'omega-net; connect johnson-ortho';     break }
+               if (host == 'the-hub')       { cmd = 'omega-net; connect the-hub';           break }
+               if (host == 'crush-fitness') { cmd = 'omega-net; connect crush-fitness';     break }
+            case 3:
+               if (host == 'computek')      { cmd = 'neo-net; connect computek';            break }
+               if (host == 'catalyst')      { cmd = 'computek; connect catalyst';           break }
+               if (host == 'summit-uni')    { cmd = 'johnson-ortho; connect summit-uni';    break }
+               if (host == 'netlink')       { cmd = 'phantasy; connect netlink';            break }
+               if (host == 'rothman-uni')   { cmd = 'netlink; connect rothman-uni';         break }
+               if (host == 'I.I.I.I')       { cmd = 'netlink; connect I.I.I.I';             break }
          }
 
-         shell(`home; connect ${cmd}; backdoor`);
-         await ns.sleep(6000);
+         if (cmd)
+         {
+            let ccmd = `home; connect ${cmd}; backdoor`;
+            ns.printf(`Executing ${ccmd}`)
+            shell(ccmd);
+            await ns.sleep(sleep_time[ports]);
 
-         ns.tprintf(`${c.magenta}And finaly installed the backdoor on ${host}.${c.reset}`);
+            ns.tprintf(`${c.magenta}And finaly installed the backdoor on ${host}.${c.reset}`);
+         }
       }
       else
          ns.tprintf(`${c.magenta}Not able to nuke() ${host}. Check the darkweb !!!${c.reset}`);
