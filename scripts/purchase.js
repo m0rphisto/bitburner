@@ -66,6 +66,7 @@ export async function main(ns) {
    no_ram.forEach(a => ns.getServerMaxRam(a) > 0 && no_ram.delete(a)); // 0.05GB
    no_ram.delete('The-Cave'); // Has 0GB but $0 max also
    no_ram.delete('darkweb');  // Has 0GB but $0 max also
+   no_ram.delete('w0r1d_d3m0n');  // Has 0GB but $0 max also
    no_ram.forEach(nram => {
 
       // Purchased server already deployed?
