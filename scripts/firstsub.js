@@ -102,27 +102,27 @@ export async function main(ns) {
          {
             // Only hosts in home's subnet are directly connectable.
             case 0:
-               if (host == 'nectar-net')    { cmd = 'hong-fang-tea; connect nectar-net';    break }
+               if (host == 'nectar-net')    { cmd = 'sigma-cosmetics; connect nectar-net'; break }
             case 1:
-               if (host == 'max-hardware')  { cmd = 'n00dles; connect max-hardware';        break }
-               if (host == 'zer0')          { cmd = 'joesguns; connect zer0';               break }
-               if (host == 'CSEC')          { cmd = 'foodnstuff; connect CSEC';             break }
-               if (host == 'neo-net')       { cmd = 'zer0; connect neo-net';                break }
+               if (host == 'zer0')          { cmd = 'n00dles; connect zer0'; break }
+               if (host == 'neo-net')       { cmd = 'n00dles; connect zer0; connect neo-net'; break }
+               if (host == 'max-hardware')  { cmd = 'hong-fang-tea; connect max-hardware'; break }
+               if (host == 'CSEC')          { cmd = 'hong-fang-tea; connect CSEC'; break }
             case 2:
-               if (host == 'silver-helix')  { cmd = 'nectar-net; connect silver-helix';     break }
-               if (host == 'phantasy')      { cmd = 'nectar-net; connect phantasy';         break }
-               if (host == 'omega-net')     { cmd = 'CSEC; connect omega-net';              break }
-               if (host == 'avmnite-02h')   { cmd = 'neo-net; connect avmnite-02h';         break }
-               if (host == 'johnson-ortho') { cmd = 'omega-net; connect johnson-ortho';     break }
-               if (host == 'the-hub')       { cmd = 'omega-net; connect the-hub';           break }
-               if (host == 'crush-fitness') { cmd = 'omega-net; connect crush-fitness';     break }
+               if (host == 'silver-helix')  { cmd = 'n00dles; connect zer0; connect silver-helix'; break }
+               if (host == 'johnson-ortho') { cmd = 'n00dles; connect zer0; connect silver-helix; connect johnson-ortho'; break }
+               if (host == 'the-hub')       { cmd = 'n00dles; connect zer0; connect neo-net; connect the-hub'; break }
+               if (host == 'phantasy')      { cmd = 'sigma-cosmetics; connect nectar-net; connect phantasy'; break }
+               if (host == 'crush-fitness') { cmd = 'sigma-cosmetics; connect nectar-net; connect phantasy; connect crush-fitness'; break }
+               if (host == 'omega-net')     { cmd = 'sigma-cosmetics; connect nectar-net; connect omega-net'; break }
+               if (host == 'avmnite-02h')   { cmd = 'sigma-cosmetics; connect nectar-net; connect omega-net; connect avmnite-02h'; break }
             case 3:
-               if (host == 'computek')      { cmd = 'neo-net; connect computek';            break }
-               if (host == 'catalyst')      { cmd = 'computek; connect catalyst';           break }
-               if (host == 'summit-uni')    { cmd = 'johnson-ortho; connect summit-uni';    break }
-               if (host == 'netlink')       { cmd = 'phantasy; connect netlink';            break }
-               if (host == 'rothman-uni')   { cmd = 'netlink; connect rothman-uni';         break }
-               if (host == 'I.I.I.I')       { cmd = 'netlink; connect I.I.I.I';             break }
+               if (host == 'netlink')       { cmd = 'n00dles; connect zer0; connect silver-helix; connect netlink'; break }
+               if (host == 'catalyst')      { cmd = 'n00dles; connect zer0; connect neo-net; connect the-hub; connect catalyst'; break }
+               if (host == 'summit-uni')    { cmd = 'sigma-cosmetics; connect nectar-net; connect omega-net; connect avmnite-02h; connect summit-uni'; break }
+               if (host == 'computek')      { cmd = 'sigma-cosmetics; connect nectar-net; connect phantasy; connect computek'; break }
+               if (host == 'rothman-uni')   { cmd = 'sigma-cosmetics; connect nectar-net; connect phantasy; connect computek; connect rothman-uni'; break }
+               if (host == 'I.I.I.I')       { cmd = 'sigma-cosmetics; connect nectar-net; connect phantasy; connect crush-fitness; connect I.I.I.I'; break }
          }
 
          if (cmd)
