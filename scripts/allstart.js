@@ -1,5 +1,5 @@
 /**
- * $Id: allstart.js v0.7 2023-08-14 23:11:47 5.90GB .m0rph $
+ * $Id: allstart.js v0.8 2023-08-16 22:21:20 5.90GB .m0rph $
  * 
  * description:
  *    Restarts all looper scripts on hacked and on purchased servers.
@@ -35,7 +35,7 @@ export async function main(ns) {
 
    let hosts  = new Set(['home']); // Get a complete r00ted hosts list.
    hosts.forEach(a => ns.scan(a).forEach(b => b.match('pserv') ?? hosts.add(b).delete('home')));
-   ['darkweb','The-Cave','w0r1d_d3m0n'].forEach(h => no_ram.delete(h)); // Has 0GB but $0 max also
+   ['darkweb', 'The-Cave', 'w0r1d_d43m0n'].forEach(h => hosts.delete(h)); // Have 0GB but $0 max also
 
    
    if (has_option(ns, '-s'))
