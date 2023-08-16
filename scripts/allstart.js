@@ -35,6 +35,9 @@ export async function main(ns) {
 
    let hosts  = new Set(['home']); // Get a complete r00ted hosts list.
    hosts.forEach(a => ns.scan(a).forEach(b => b.match('pserv') ?? hosts.add(b).delete('home')));
+   hosts.delete('The-Cave');    // Has 0GB but $0 max also
+   hosts.delete('darkweb');     // Has 0GB but $0 max also
+   hosts.delete('w0r1d_d3m0n'); // Has 0GB but $0 max also
 
    
    if (has_option(ns, '-s'))
@@ -100,8 +103,6 @@ export async function main(ns) {
        */
       let i = 0;
       hosts.forEach(a => ns.getServerMaxRam(a) > 0 && hosts.delete(a));
-      hosts.delete('The-Cave'); // Has 0GB but $0 max also
-      hosts.delete('darkweb');  // Has 0GB but $0 max also
       hosts.forEach(nram => {
          [
             '/modules/colors.js', '/modules/arguments.js', '/modules/datetime.js', weaken, grow, hack, master
