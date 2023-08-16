@@ -64,9 +64,7 @@ export async function main(ns) {
    let no_ram = new Set(['home']);
    no_ram.forEach(a => ns.scan(a).forEach(b => no_ram.add(b).delete('home'))); // 0.2GB
    no_ram.forEach(a => ns.getServerMaxRam(a) > 0 && no_ram.delete(a)); // 0.05GB
-   no_ram.delete('The-Cave'); // Has 0GB but $0 max also
-   no_ram.delete('darkweb');  // Has 0GB but $0 max also
-   no_ram.delete('w0r1d_d3m0n');  // Has 0GB but $0 max also
+   ['darkweb','The-Cave','w0r1d_d3m0n'].forEach(h => no_ram.delete(h)); // Has 0GB but $0 max also
    no_ram.forEach(nram => {
 
       // Purchased server already deployed?

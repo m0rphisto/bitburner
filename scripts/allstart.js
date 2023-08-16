@@ -35,9 +35,7 @@ export async function main(ns) {
 
    let hosts  = new Set(['home']); // Get a complete r00ted hosts list.
    hosts.forEach(a => ns.scan(a).forEach(b => b.match('pserv') ?? hosts.add(b).delete('home')));
-   hosts.delete('The-Cave');    // Has 0GB but $0 max also
-   hosts.delete('darkweb');     // Has 0GB but $0 max also
-   hosts.delete('w0r1d_d3m0n'); // Has 0GB but $0 max also
+   ['darkweb','The-Cave','w0r1d_d3m0n'].forEach(h => no_ram.delete(h)); // Has 0GB but $0 max also
 
    
    if (has_option(ns, '-s'))
