@@ -1,5 +1,5 @@
 /**
- * $Id: purchase.js v0.1 2023-08-17 07:17:16 5.70GB .m0rph $
+ * $Id: purchase.js v0.2 2023-08-17 16:42:05 5.70GB .m0rph $
  * 
  * description:
  *    Automated hacknet management process.
@@ -20,7 +20,7 @@ import {d} from '/modules/datetime.js';
  * @param {string}   mode  File open mode >> w = create new file, a = append to file.
  */
 const timestamp = d.timestamp();
-function log (data, mode) {
+function log (ns, data, mode) {
    const m = mode ? mode : 'w';
    ns.print(`${c.cyan}${data}${c.reset}`);
    ns.write(`/log/hacknet.purchase.${timestamp}.js`, data, m);
@@ -38,13 +38,13 @@ async function purchase(ns, num_nodes)
 
    if (ns.hacknet.numNodes() > num_nodes) return;
 
-   for (let i = ns.hacknet.numNodes(); i <= num_nodes; i++)
+   for (let i = ns.hacknet.numNodes(); i < num_nodes; i++)
    {
       if (ns.getServerMoneyAvailable('home') > ns.hacknet.getPurchaseNodeCost())
       {
          let id = ns.hacknet.purchaseNode();
 
-         if (id !== -1) log(`[${d.gettime()}] Purchased hacknet node ${id}.`, 'a');
+         if (id !== -1) log(ns, `[${d.gettime()}] Purchased hacknet node ${id}.`, 'a');
          else
             throw new Error(`Could not purchase hacknet node ${id}.`);
       }
@@ -59,11 +59,11 @@ export async function main(ns) {
 
    let
       num_nodes = [6,    12,    24,  30],
-      num_money = [10e6, 100e6, 1e9, 100e9],
-      no_log    = ['getServerMoneyAvailable', 'sleep'];
+      num_money = [10e6, 100e6, 1e9, 100e9];
    
-   no_log.forEach(nl => ns.disableLog(nl));
-   log(`Hacknet node purchase run started at ${d.getdate()}, ${d.gettime()}:`);
+   ns.disableLog('sleep');
+   ns.disableLog('getServerMoneyAvailable' );
+   log(ns, `Hacknet node purchase run started at ${d.getdate()}, ${d.gettime()}:`);
 
    // We start at a number of three hacknet nodes ...
    await purchase(ns, 3);
