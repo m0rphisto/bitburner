@@ -26,8 +26,10 @@ function log (ns, data, mode) {
 }
 
 const sleep_time = (money) => {
+
    switch (money)
    {
+      // We do not need to wait for long, if there's enough money.
       case money < 10e6:  return 6e4; // 1   min
       case money > 10e6:  return 3e4; // 30  sec
       case money > 100e6: return 1e4; // 10  sec
