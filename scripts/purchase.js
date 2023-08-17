@@ -1,5 +1,5 @@
 /** 
- * Id: purchase.js v0.5 2023-08-15 19:40:16 6.45GB .m0prh $
+ * Id: purchase.js v0.6 2023-08-17 23:59:58 6.45GB .m0prh $
  * 
  * Note:
  *    Script usable AFTER the first home server RAM upgrade !!!
@@ -83,6 +83,6 @@ export async function main(ns) {
       else
          ns.printf(`${c.magenta}No root access to ${nram}, so not starting looper master !!!${c.reset}`)
 
-      i++;
+      i == ns.getPurchasedServerLimit() ? ns.exit() : i++;
    });
 }
