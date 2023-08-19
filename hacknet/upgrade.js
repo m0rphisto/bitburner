@@ -1,5 +1,5 @@
 /**
- * $Id: upgrade.js v0.2 2023-08-19 03:18:52 6.70GB .m0rph $
+ * $Id: upgrade.js v0.3 2023-08-19 19:21:50 6.70GB .m0rph $
  * 
  * description:
  *    Automated hacknet node upgrade process.
@@ -27,14 +27,15 @@ function log (ns, data, mode) {
 
 const sleep_time = (money) => {
    
-   switch (money)
+   switch (true)
    {
       // We do not need to wait for long, if there's enough money.
-      case money < 10e6:  return 6e4; // 1   min
       case money > 10e6:  return 3e4; // 30  sec
       case money > 100e6: return 1e4; // 10  sec
       case money > 1e9:   return 1e3; // 1   sec
       case money > 100e9: return 500; // 0.5 sec 
+      default:
+         return 6e4; // 1 min
    }
 };
 const max = {
@@ -47,6 +48,7 @@ async function upgrade(ns, type)
 {
    'use strict';
 
+
    for (let i = 0; i < ns.hacknet.numNodes(); i++)
    {
       // For interval calculation see quacksouls comments on is_upgrade_core_ram_cache():
@@ -55,6 +57,12 @@ async function upgrade(ns, type)
          is_money = ns.getServerMoneyAvailable('home'),
          stats    = ns.hacknet.getNodeStats(i),
          interval = stats.level  % 30;
+      
+      if (stats[type] == max[type])
+      {
+         log(ns, `[${d.gettime()}] hacknet-node-${i - 1}'s ${type} is at max(${stats[type]}).\n`, 'a');
+         return;
+      }
 
       const is_time = {
          'level' () { return !!1            },
@@ -71,9 +79,6 @@ async function upgrade(ns, type)
          'ram'   (i) { return ns.hacknet.upgradeRam(i)   },
          'cores' (i) { return ns.hacknet.upgradeCore(i)  }
       };
-      //log(ns, `[${d.gettime()}] DEBUG - cost[${type}](i) - ${cost[type](i)}\n`, 'a');
-      //log(ns, `[${d.gettime()}] DEBUG - stats[${type}] - `+stats[type]+` :: max[type] - ${max[type]}\n`, 'a');
-      //log(ns, `[${d.gettime()}] DEBUG - is_time = ${is_time[type]()}\n`, 'a');
 
       if (is_money > cost[type](i) && stats[type] < max[type] &&  (stats.level == max.level || is_time[type]()))
       {
@@ -92,6 +97,8 @@ export async function main(ns) {
    
    ns.disableLog('sleep');
    ns.disableLog('getServerMoneyAvailable');
+
+   ns.tail();
 
    let run = true;
    const chk = (type) => {
@@ -116,7 +123,5 @@ export async function main(ns) {
       await upgrade(ns, 'level');
       await upgrade(ns, 'ram');
       await upgrade(ns, 'cores');
-
-      //await ns.sleep(6e4);
    }
 }
