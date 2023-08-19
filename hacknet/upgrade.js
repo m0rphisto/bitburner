@@ -1,5 +1,5 @@
 /**
- * $Id: upgrade.js v0.1 2023-08-18 01:28:35 6.70GB .m0rph $
+ * $Id: upgrade.js v0.2 2023-08-19 03:18:52 6.70GB .m0rph $
  * 
  * description:
  *    Automated hacknet node upgrade process.
@@ -26,7 +26,7 @@ function log (ns, data, mode) {
 }
 
 const sleep_time = (money) => {
-
+   
    switch (money)
    {
       // We do not need to wait for long, if there's enough money.
@@ -47,7 +47,7 @@ async function upgrade(ns, type)
 {
    'use strict';
 
-   for (let i = 0; i < max.nodes; i++)
+   for (let i = 0; i < ns.hacknet.numNodes(); i++)
    {
       // For interval calculation see quacksouls comments on is_upgrade_core_ram_cache():
       // https://github.com/quacksouls/bitburner/blob/main/src/hnet.js
@@ -96,15 +96,15 @@ export async function main(ns) {
    let run = true;
    const chk = (type) => {
       
-      let nodes = 0;
+      let nodes = 0, num_nodes = ns.hacknet.numNodes();
 
-      for (let i = 0; i < max.nodes; i++)
+      for (let i = 0; i < num_nodes; i++)
       {
          const stats = ns.hacknet.getNodeStats(i);
          nodes += stats[type] == max[type] ? 1 : 0;
       }
 
-      return nodes == max.nodes ? !!1 : !!0;
+      return nodes == num_nodes ? !!1 : !!0;
    };
 
    while (run)
