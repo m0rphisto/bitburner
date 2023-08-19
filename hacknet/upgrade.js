@@ -42,12 +42,11 @@ const max = {
    nodes: 30,
    level: 200, 
    ram:   64,
-   cores:  16
+   cores: 16
 };
 async function upgrade(ns, type)
 {
    'use strict';
-
 
    for (let i = 0; i < ns.hacknet.numNodes(); i++)
    {

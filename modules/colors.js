@@ -1,9 +1,5 @@
-  
 /** 
- * filename: colors.js
- * date: 2023-07-08
- * version: 0.1
- * author: .m0rph
+ * $Id colors.js v0.2 2023-08-19 22:47:35 1.60GB .m0rph $
  * 
  * descripttion:
  *    Module for terminal color handling.
@@ -12,7 +8,7 @@
  * @param void
  */
 
-export var c = { 
+export const c = { 
 
    black:        "\u001b[30m",
    red:          "\u001b[31m",
@@ -32,8 +28,16 @@ export var c = {
    boldcyan:     "\u001b[1;36m",
    boldwhite:    "\u001b[1;37m",
 
-   italic:      "\u001b[3;37m",
    uwhite:      "\u001b[4;37m",
+
+   //italic:      "\u001b[3;37m",
+   iblack:      "\u001b[3;30m",
+   igreen:      "\u001b[3;32m",
+   iyellow:     "\u001b[3;33m",
+   iblue:       "\u001b[3;34m",
+   imagenta:    "\u001b[3;35m",
+   icyan:       "\u001b[3;36m",
+   iwhite:      "\u001b[3;37m",
 
    reset:       "\u001b[0m"
 }
