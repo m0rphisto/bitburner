@@ -1,5 +1,5 @@
 /** 
- * $Id: next.js v0.1 2023-08-05 01:14:16 2.25GB .m0rph $
+ * $Id: next.js v0.2 2023-08-20 17:27:36 2.25GB .m0rph $
  * 
  * description:
  *    What will be our next target?
@@ -49,9 +49,9 @@ export async function main(ns) {
 
    });
 
-   ns.tprintf(`${c.white}>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>${c.reset}`);
+   ns.tprintf(`${c.white}>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>`);
    ns.tprintf(`${c.white}> NEXT TARGET: ${c.cyan}${target}${c.reset}`);
-   ns.tprintf(`${c.white}>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>${c.reset}`);
+   ns.tprintf(`${c.white}>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>`);
    
-   log(`Next target is ${target}`);
+   log(`${target}`);
 }
