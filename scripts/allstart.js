@@ -115,6 +115,9 @@ export async function main(ns) {
             }
          });
 
+         // Only for safety.
+         ns.killall(pserv);
+
          // OK, starting the looper master.
          ns.printf(`${c.cyan}${pserv}: Starting ${master} ${target} true${c.reset}`);
          let pid = ns.exec(master, pserv, 1, ...[target, true]);
