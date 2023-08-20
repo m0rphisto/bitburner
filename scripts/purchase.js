@@ -58,7 +58,7 @@ export async function main(ns) {
                if (!ns.fileExists(file, hostname))
                {
                   // Deploy purchased server.
-                  ns.tprintf(`Copying ${file} to ${hostname}`);
+                  ns.printf(`${c.cyan}Copying ${file} to ${hostname}`);
                   ns.scp(file, hostname);
                }
             });
@@ -67,7 +67,7 @@ export async function main(ns) {
          }
       }
       else
-         ns.printf(`${c.white}SeverCost is at ${ns.formatNumber(cost)}. Not enough money. Waiting ...${c.reset}`); 
+         ns.printf(`${c.cyan}SeverCost is at ${ns.formatNumber(cost)}. Not enough money. Waiting ...${c.reset}`); 
 
       // We need to wait for a second, otherwise the script will
       // fall into an infinite loop and the game will crash!
