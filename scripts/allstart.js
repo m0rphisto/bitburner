@@ -1,5 +1,5 @@
 /**
- * $Id: allstart.js v0.9 2023-08-20 03:54:01 6.15GB .m0rph $
+ * $Id: allstart.js v1.0 2023-08-20 22:52:47 6.05GB .m0rph $
  * 
  * description:
  *    Restarts all looper scripts on hacked and on purchased servers.
@@ -7,8 +7,11 @@
  * Note:
  *    This script needs two options, or it does NOTHING.
  * 
- *    -s Start server looper scripts.
- *    -p Start purchased server looper scripts.
+ *    -s Start    server looper scripts.
+ *    -p Start    purchased server looper scripts.
+ * 
+ *    --target    The target to attack by the purchased servers,
+ *                as determined by next.js. Default is n00dles.
  * 
  *    --threads   How many threads for the local looper scripts?
  *                Default is set to 512.
@@ -48,51 +51,44 @@ export async function main(ns) {
 
          if (ns.getHackingLevel() >= ns.getServerRequiredHackingLevel(host))
          {
-            if (ns.getServerMaxRam(host))
+            // Only just in case the hosts wasn't already r00ted.
+            if (!ns.hasRootAccess(host)) ns.run(deploy, 1, host);
+            if ( ns.hasRootAccess(host))
             {
-               // ... and then we check the self-targeting hosts.
-
-               if (
-                  ns.isRunning(weaken, host, '') ||
-                  ns.isRunning(grow,   host, '') ||
-                  ns.isRunning(hack,   host, '')
-               ) {
-                  ns.tprintf(`${c.white}One of the H/G/W scripts active on ${host}. Trying to kill it ... ${ns.killall(host) ? 'OK' : 'FAILED'}.${c.reset}`);
-               } 
-
-               // Only just in case the hosts wasn't already deployed.
-               if (!ns.hasRootAccess(host)) ns.run(deploy, 1, host);
-               if ( ns.hasRootAccess(host))
+               if (ns.getServerMaxRam(host) > 0)
                {
-                  // Finally get them running again.
+                  // Here the servers that can hack themselves ...
+
+                  if (
+                     ns.isRunning(weaken, host, '') ||
+                     ns.isRunning(grow,   host, '') ||
+                     ns.isRunning(hack,   host, '')
+                  ) {
+                     ns.tprintf(`${c.white}One of the H/G/W scripts active on ${host}. Trying to kill it ... ${ns.killall(host) ? 'OK' : 'FAILED'}.`);
+                  } 
+
                   ns.tprintf(`${c.cyan}Starting local ${master} for ${host}.${c.reset}`);
                   ns.run(master, 1, host);
                }
                else
-                  ns.tprintf(`${c.magenta}No root access to ${host}, so not starting looper master !!!${c.reset}`);
-            }
-            else
-            {
-               // Only just in case the hosts wasn't already r00ted.
-               if (!ns.hasRootAccess(host)) ns.run(deploy, 1, host);
-               if ( ns.hasRootAccess(host))
                {
-                  // Finally get them locally running again.
+                  // ... and here the nullRAMers.
+
                   ns.tprintf(`${c.cyan}Starting local ${weaken} ${host} -t ${threads}${c.reset}`);
                   ns.run(weaken, threads, host);
                   await ns.sleep(1000);
-      
+         
                   ns.tprintf(`${c.cyan}Starting local ${grow} ${host} -t ${threads}${c.reset}`);
                   ns.run(grow, threads, host);
                   await ns.sleep(1000);
-            
+               
                   ns.tprintf(`${c.cyan}Starting local ${mhack} ${host} -t ${threads}${c.reset}`);
                   ns.run(mhack, threads, host);
                   await ns.sleep(1000);
                }
-               else
-                  ns.tprintf(`${c.magenta}No root access to ${host}, so not starting looper master !!!${c.reset}`);
             }
+            else
+               ns.tprintf(`${c.magenta}No root access to ${host}, so not starting looper master !!!${c.reset}`);
          }
       }
    }
@@ -100,47 +96,31 @@ export async function main(ns) {
 
    if (has_option(ns, '-p'))
    {
-      /**
-       * OK, we have 25 servers with 0.00GB RAM. We also have 25 purchased servers.
-       * So we can let exactly one purchased server attack one null RAMmer. ;-)
-       */
-      let i = 0;
-      hosts.forEach(a => ns.getServerMaxRam(a) > 0 && hosts.delete(a));
-      hosts.forEach(nram => {
+      const target = get_option(ns, '--target')  ?? 'n00dles';
+
+      let
+         pservs = new Set(['home']);
+         pservs.forEach(a => ns.scan(a).forEach(b => b.match('pserv') && hosts.add(b).delete('home')));
+
+      for (let pserv of pservs)
+      {
          [
-            '/modules/colors.js', '/modules/arguments.js', '/modules/datetime.js', weaken, grow, hack, master
+            '/modules/colors.js', '/modules/datetime.js', 'modules/arguments.js', weaken, grow, hack, master
          ].forEach(file => {
-            if (ns.serverExists(`pserv-${i}`) && !ns.fileExists(file, `pserv-${i}`))
+            if (!ns.fileExists(file, pserv))
             {
-               // Purchased server already deployed?
-               ns.tprintf(`Copying ${file} to pserv-${i}`);
-               ns.scp(file, `pserv-${i}`);
+               // Deploy purchased server.
+               ns.tprintf(`Copying ${file} to ${pserv}`);
+               ns.scp(file, pserv);
             }
          });
 
-         // Is our hacking level high enough?
-         let my_hack_lvl = ns.getHackingLevel() >= ns.getServerRequiredHackingLevel(nram);
+         // OK, starting the looper master.
+         ns.printf(`${c.cyan}${pserv}: Starting ${master} ${target} true${c.reset}`);
+         let pid = ns.exec(master, pserv, 1, ...[target, true]);
 
-         if (ns.hasRootAccess(nram) && my_hack_lvl)
-         {
-            // Do we already have enough purchased servers?
-            if (ns.serverExists(`pserv-${i}`))
-            {
-               // Any running scripts?
-               ns.killall(`pserv-${i}`);
-
-               // OK, starting the looper master.
-               ns.tprintf(`${c.cyan}pserv-${i}: Starting ${master} ${nram} true${c.reset}`);
-               let pid = ns.exec(master, `pserv-${i}`, 1, ...[nram, true]);
-
-               if (pid == 0)
-                  ns.tprintf(`${c.red}Could not start the looper master.${c.reset}`);
-            }
-         }
-         else
-            ns.tprintf(`${c.magenta}No root access to ${nram}, so not starting looper master !!!${c.reset}`)
-         
-         i++;
-      });
+         if (pid == 0)
+            ns.printf(`${c.magenta}Could not start the looper master on ${pserv}.`);
+      }
    }
 }
