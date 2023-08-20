@@ -1,5 +1,5 @@
 /**
- * $Id: upgrade.js v0.3 2023-08-19 19:21:50 6.70GB .m0rph $
+ * $Id: upgrade.js v0.4 2023-08-20 04:10:54 6.70GB .m0rph $
  * 
  * description:
  *    Automated hacknet node upgrade process.
@@ -42,11 +42,12 @@ const max = {
    nodes: 30,
    level: 200, 
    ram:   64,
-   cores: 16
+   cores:  16
 };
 async function upgrade(ns, type)
 {
    'use strict';
+
 
    for (let i = 0; i < ns.hacknet.numNodes(); i++)
    {
@@ -59,33 +60,37 @@ async function upgrade(ns, type)
       
       if (stats[type] == max[type])
       {
-         log(ns, `[${d.gettime()}] hacknet-node-${i - 1}'s ${type} is at max(${stats[type]}).\n`, 'a');
-         return;
+         log(ns, `[${d.gettime()}] hacknet-node-${i}'s ${type} is at max(${stats[type]}).\n`, 'a');
       }
-
-      const is_time = {
-         'level' () { return !!1            },
-         'ram'   () { return interval === 0 },
-         'cores' () { return interval === 0 }
-      };
-      const cost = {
-         'level' (i) { return ns.hacknet.getLevelUpgradeCost(i) },
-         'ram'   (i) { return ns.hacknet.getRamUpgradeCost(i)   },
-         'cores' (i) { return ns.hacknet.getCoreUpgradeCost(i)  }
-      };
-      const upgrade = {
-         'level' (i) { return ns.hacknet.upgradeLevel(i) },
-         'ram'   (i) { return ns.hacknet.upgradeRam(i)   },
-         'cores' (i) { return ns.hacknet.upgradeCore(i)  }
-      };
-
-      if (is_money > cost[type](i) && stats[type] < max[type] &&  (stats.level == max.level || is_time[type]()))
+      else
       {
-         if (upgrade[type](i)) log(ns, `[${d.gettime()}] ${type} upgrade - node ${i}.\n`, 'a');
-         else
-            throw new Error(`Could not upgrade ${type} for hacknet node ${i}`);
+         const is_time = {
+            'level' () { return !!1            },
+            'ram'   () { return interval === 0 },
+            'cores' () { return interval === 0 }
+         };
+         const cost = {
+            'level' (i) { return ns.hacknet.getLevelUpgradeCost(i) },
+            'ram'   (i) { return ns.hacknet.getRamUpgradeCost(i)   },
+            'cores' (i) { return ns.hacknet.getCoreUpgradeCost(i)  }
+         };
+         const upgrade = {
+            'level' (i) { return ns.hacknet.upgradeLevel(i) },
+            'ram'   (i) { return ns.hacknet.upgradeRam(i)   },
+            'cores' (i) { return ns.hacknet.upgradeCore(i)  }
+         };
+         //log(ns, `[${d.gettime()}] DEBUG - cost[${type}](i) - ${cost[type](i)}\n`, 'a');
+         //log(ns, `[${d.gettime()}] DEBUG - stats[${type}] - `+stats[type]+` :: max[type] - ${max[type]}\n`, 'a');
+         //log(ns, `[${d.gettime()}] DEBUG - is_time = ${is_time[type]()}\n`, 'a');
 
-         await ns.sleep(sleep_time(is_money));
+         if (is_money > cost[type](i) && stats[type] < max[type] &&  (stats.level == max.level || is_time[type]()))
+         {
+            if (upgrade[type](i)) log(ns, `[${d.gettime()}] ${type} upgrade - node ${i}.\n`, 'a');
+            else
+               throw new Error(`Could not upgrade ${type} for hacknet node ${i}`);
+
+            await ns.sleep(sleep_time(is_money));
+         }
       }
    }
 }
@@ -122,5 +127,7 @@ export async function main(ns) {
       await upgrade(ns, 'level');
       await upgrade(ns, 'ram');
       await upgrade(ns, 'cores');
+
+      //await ns.sleep(6e4);
    }
 }
