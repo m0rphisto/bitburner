@@ -42,7 +42,7 @@ export async function main(ns) {
          if (!ns.fileExists(file, pserv))
          {
             // Deploy purchased server.
-            ns.tprintf(`Copying ${file} to ${pserv}`);
+            ns.printf(`${c.cyan}Copying ${file} to ${pserv}`);
             ns.scp(file, pserv);
          }
       });
