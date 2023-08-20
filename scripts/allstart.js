@@ -45,7 +45,7 @@ export async function main(ns) {
       for (let host of hosts)
       {
          // Is our hacking level high enough?
-         let my_hack_lvl = ns.getHackingLevel() >= ns.getServerRequiredHackingLevel();
+         let my_hack_lvl = ns.getHackingLevel() >= ns.getServerRequiredHackingLevel(host);
 
          if (ns.getServerMaxRam(host) > 0 && my_hack_lvl)
          {
@@ -117,7 +117,7 @@ export async function main(ns) {
          });
 
          // Is our hacking level high enough?
-         let my_hack_lvl = ns.getHackingLevel() >= ns.getServerRequiredHackingLevel();
+         let my_hack_lvl = ns.getHackingLevel() >= ns.getServerRequiredHackingLevel(nram);
 
          if (ns.hasRootAccess(nram) && my_hack_lvl)
          {
