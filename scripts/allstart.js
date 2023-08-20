@@ -45,52 +45,54 @@ export async function main(ns) {
       for (let host of hosts)
       {
          // Is our hacking level high enough?
-         let my_hack_lvl = ns.getHackingLevel() >= ns.getServerRequiredHackingLevel(host);
 
-         if (ns.getServerMaxRam(host) > 0 && my_hack_lvl)
+         if (ns.getHackingLevel() >= ns.getServerRequiredHackingLevel(host))
          {
-            // ... and then we check the self-targeting hosts.
-
-            if (
-               ns.isRunning(weaken, host, '') ||
-               ns.isRunning(grow,   host, '') ||
-               ns.isRunning(hack,   host, '')
-            ) {
-               ns.tprintf(`${c.white}One of the H/G/W scripts active on ${host}. Trying to kill it ... ${ns.killall(host) ? 'OK' : 'FAILED'}.${c.reset}`);
-            } 
-
-            // Only just in case the hosts wasn't already deployed.
-            if (!ns.hasRootAccess(host)) ns.run(deploy, 1, host);
-            if ( ns.hasRootAccess(host))
+            if (ns.getServerMaxRam(host))
             {
-               // Finally get them running again.
-               ns.tprintf(`${c.cyan}Starting local ${master} for ${host}.${c.reset}`);
-               ns.run(master, 1, host);
+               // ... and then we check the self-targeting hosts.
+
+               if (
+                  ns.isRunning(weaken, host, '') ||
+                  ns.isRunning(grow,   host, '') ||
+                  ns.isRunning(hack,   host, '')
+               ) {
+                  ns.tprintf(`${c.white}One of the H/G/W scripts active on ${host}. Trying to kill it ... ${ns.killall(host) ? 'OK' : 'FAILED'}.${c.reset}`);
+               } 
+
+               // Only just in case the hosts wasn't already deployed.
+               if (!ns.hasRootAccess(host)) ns.run(deploy, 1, host);
+               if ( ns.hasRootAccess(host))
+               {
+                  // Finally get them running again.
+                  ns.tprintf(`${c.cyan}Starting local ${master} for ${host}.${c.reset}`);
+                  ns.run(master, 1, host);
+               }
+               else
+                  ns.tprintf(`${c.magenta}No root access to ${host}, so not starting looper master !!!${c.reset}`);
             }
             else
-               ns.tprintf(`${c.magenta}No root access to ${host}, so not starting looper master !!!${c.reset}`);
-         }
-         else
-         {
-            // Only just in case the hosts wasn't already r00ted.
-            if (!ns.hasRootAccess(host)) ns.run(deploy, 1, host);
-            if ( ns.hasRootAccess(host))
             {
-               // Finally get them locally running again.
-               ns.tprintf(`${c.cyan}Starting local ${weaken} ${host} -t ${threads}${c.reset}`);
-               ns.run(weaken, threads, host);
-               await ns.sleep(1000);
-   
-               ns.tprintf(`${c.cyan}Starting local ${grow} ${host} -t ${threads}${c.reset}`);
-               ns.run(grow, threads, host);
-               await ns.sleep(1000);
-         
-               ns.tprintf(`${c.cyan}Starting local ${mhack} ${host} -t ${threads}${c.reset}`);
-               ns.run(mhack, threads, host);
-               await ns.sleep(1000);
+               // Only just in case the hosts wasn't already r00ted.
+               if (!ns.hasRootAccess(host)) ns.run(deploy, 1, host);
+               if ( ns.hasRootAccess(host))
+               {
+                  // Finally get them locally running again.
+                  ns.tprintf(`${c.cyan}Starting local ${weaken} ${host} -t ${threads}${c.reset}`);
+                  ns.run(weaken, threads, host);
+                  await ns.sleep(1000);
+      
+                  ns.tprintf(`${c.cyan}Starting local ${grow} ${host} -t ${threads}${c.reset}`);
+                  ns.run(grow, threads, host);
+                  await ns.sleep(1000);
+            
+                  ns.tprintf(`${c.cyan}Starting local ${mhack} ${host} -t ${threads}${c.reset}`);
+                  ns.run(mhack, threads, host);
+                  await ns.sleep(1000);
+               }
+               else
+                  ns.tprintf(`${c.magenta}No root access to ${host}, so not starting looper master !!!${c.reset}`);
             }
-            else
-               ns.tprintf(`${c.magenta}No root access to ${host}, so not starting looper master !!!${c.reset}`);
          }
       }
    }
