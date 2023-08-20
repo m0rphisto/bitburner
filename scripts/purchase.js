@@ -1,5 +1,9 @@
 /** 
- * Id: purchase.js v0.6 2023-08-17 23:59:58 6.45GB .m0prh $
+ * Id: purchase.js v0.7 2023-08-20 17:00:54 8.45GB .m0prh $
+ * 
+ * Options:
+ *    -r [0-9]+   RAM for server to purchase
+ *    -m [0-9]+   Maximum count of servers to purchase
  * 
  * Note:
  *    Script usable AFTER the first home server RAM upgrade !!!
@@ -11,9 +15,11 @@
  */
 
 import {c} from '/modules/colors.js';
+import {get_option} from '/modules/arguments.js'
 
 export async function main(ns) {
 
+   ns.disableLog('sleep');
    ns.tail();
 
    const
@@ -22,15 +28,17 @@ export async function main(ns) {
          '/modules/colors.js', '/modules/datetime.js', 'modules/arguments.js',
          '/looper/weaken.js', '/looper/grow.js', '/looper/hack.js', master
       ],
-      ram      = ns.args[0] ?? 8192,
-      cost     = ns.getPurchasedServerCost(ram); // 0.25GB
+      ram      = get_option(ns, '-r') ?? 8192,
+      max      = get_option(ns, '-m') ?? 25,
+      cost     = ns.getPurchasedServerCost(ram),  // 0.25GB
+      start    = ns.getPurchasedServers().length; // 2.25GB
+
 
    /**
     * At first we purchase the servers.
     */
-      
-   let i = 0;
-   while (i < ns.getPurchasedServerLimit()) // 0.05GB
+   let i = start;
+   while (i < start + max)
    {
       let money = ns.getServerMoneyAvailable('home'); // 0.1GB
       // Continously try to purchase a server until we've reached the
@@ -41,11 +49,22 @@ export async function main(ns) {
 
          if (hostname == '')
          {
-            ns.printf(`${c.red}Failed to purchase server ram(${ram}) !!!${c.reset}`);
+            ns.printf(`${c.red}Failed to purchase server !!!${c.reset}`);
             ns.exit();
          }
          else
+         {
+            files.forEach(file => {
+               if (!ns.fileExists(file, hostname))
+               {
+                  // Deploy purchased server.
+                  ns.tprintf(`Copying ${file} to ${hostname}`);
+                  ns.scp(file, hostname);
+               }
+            });
+
             i++;
+         }
       }
       else
          ns.printf(`${c.white}SeverCost is at ${ns.formatNumber(cost)}. Not enough money. Waiting ...${c.reset}`); 
@@ -54,35 +73,4 @@ export async function main(ns) {
       // fall into an infinite loop and the game will crash!
       await ns.sleep(1000);
    }
-
-   /**
-    * OK, we should now have 25 purchased servers, and we have 25 servers with 0.00GB RAM
-    * on the network which make sense to attack. So we can let exactly one purchased server
-    * attack one null RAMmer. ;-)
-    */
-   i = 0;
-   let no_ram = new Set(['home']);
-   no_ram.forEach(a => ns.scan(a).forEach(b => no_ram.add(b).delete('home'))); // 0.2GB
-   no_ram.forEach(a => ns.getServerMaxRam(a) > 0 && no_ram.delete(a)); // 0.05GB
-   ['darkweb','The-Cave','w0r1d_d3m0n'].forEach(h => no_ram.delete(h)); // Has 0GB but $0 max also
-   no_ram.forEach(nram => {
-
-      // Purchased server already deployed?
-      ns.scp(files, `pserv-${i}`); // 0.6GB
-
-      if (ns.hasRootAccess(nram)) // 0.05GB
-      {
-         // OK, starting the looper master.
-         ns.printf(`${c.cyan}pserv-${i}: Starting ${master} ${nram} true${c.reset}`);
-         let pid = ns.exec(master, `pserv-${i}`, 1, ...[nram, true]); // 1.3GB
-
-         if (pid == 0)
-            ns.printf(`${c.red}Could not start the looper master.${c.reset}`);
-         
-      }
-      else
-         ns.printf(`${c.magenta}No root access to ${nram}, so not starting looper master !!!${c.reset}`)
-
-      i == ns.getPurchasedServerLimit() ? ns.exit() : i++;
-   });
 }
