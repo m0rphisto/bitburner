@@ -27,7 +27,7 @@ const get_path = (ns, host, lasthost, target) => {
    let hosts = ns.scan(host);
 
    for (let i = 0; i < hosts.length; i++)
-	   if (hosts[i] != lasthost)
+      if (hosts[i] != lasthost)
          if (get_path(ns, hosts[i], host, target)) found = !!1;
 
    if (found) path.unshift(host);
