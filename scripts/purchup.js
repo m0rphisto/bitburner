@@ -19,22 +19,23 @@ import {d} from '/modules/datetime.js';
 
 export async function main(ns) {
 
+   const
+      file = `/log/purchup.${d.timestamp()}.js`,
+      ram  = ns.args[0] ?? 8192;
+   let
+      pservs = new Set(['home']);
+      pservs.forEach(a => ns.scan(a).forEach(b => b.match('pserv') && pservs.add(b).delete('home')));
+ 
+ 
    /**
     * Logging facility.
     */
    const log = (msg) => {
-      const
-         file = `/log/purchup.${d.timestamp()}.js`,
-         mode = ns.fileExists(file) ? 'a' : 'w';
-
+      const mode = ns.fileExists(file) ? 'a' : 'w';
       ns.write(file, `[${d.gettime()}] ${msg}\n`, mode);
    }
    log(`Purchased servers upgrade run started at: ${d.getdate()}, ${d.gettime()}\n`);
 
-   const ram = ns.args[0] ?? 8192;
-   let
-      pservs = new Set(['home']);
-      pservs.forEach(a => ns.scan(a).forEach(b => b.match('pserv') && pservs.add(b).delete('home')));
 
    for (let ps of pservs)
    {
