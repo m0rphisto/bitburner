@@ -1,5 +1,5 @@
 /** 
- * $Id colors.js v0.2 2023-08-19 22:47:35 1.60GB .m0rph $
+ * $Id: colors.js v0.2 2023-08-19 22:47:35 1.60GB .m0rph $
  * 
  * descripttion:
  *    Module for terminal color handling.

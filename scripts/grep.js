@@ -1,9 +1,5 @@
 /** 
- * filename: grep.js
- *     date: 2023-07-20
- *  version: 0.3
- *   author: .m0rph
- *      RAM: 3.00GB
+ * $Id: grep.js v0.3 2023-08-22 00:31:26 3.00GB .m0rph $
  * 
  * descripttion:
  *    We simply need a unix grep !!!
@@ -50,62 +46,61 @@ export async function main(ns) {
        * So: RexExp.exec() fills RAM on stdin =~ /^(n00dles|ecorp|\.):.*$/
        *     File to grep through was /log/getnet-TIMESTAMP.log.js
        */
-      load: (str) => {
+      load (str) {
 
          let k = 0;
-         for (let i = 0; i < str.length; i++) {
-
+         for (let i = 0; i < str.length; i++)
+         {
             let char = str.charAt(i);
 
-            if (char == "\n") { // Whoops, we found a line feed.
-
+            if (char == "\n") // Whoops, we found a line feed.
+            {
                k++;
 
                continue;
             }
-            mns.stdin[k] = sprintf(`${(mns.stdin[k]) ? mns.stdin[k] : ''}${char}`);
+            //console.log(char);
+            this.stdin[k] = `${this.stdin[k] ? this.stdin[k] : ''}${char}`;
          }
       },
 
       /**
        * Method: Get the lines that match the regular expression.
        */
-      grep: () => {
+      grep () {
 
-         //k = 0;
          let stdin = '',
-             regex = new RegExp(mns.regex);
-         while (stdin = mns.stdin.shift()) {
-            if (regex.test(stdin)) mns.stdout.push(stdin);
-         }
+             regex = new RegExp(this.regex);
+
+         while (stdin = this.stdin.shift())
+            if (regex.test(stdin)) this.stdout.push(stdin);
       }
    };
 
-   if (a.count(ns.args, 2)) {
-
+   if (a.count(ns.args, 2))
+   {
       // At first we check the passed arguments.
       mns.regex = a.str(ns.args[0]) ? ns.args[0] : null;
 
-      if (mns.regex) {
-
+      if (mns.regex)
+      {
          // Then we load the file contents.
          if (a.str(ns.args[1]) && ns.fileExists(ns.args[1])) mns.load(ns.read(ns.args[1]));
 
          // And finally grep() !!!
          mns.grep();
-         if (mns.stdout) {
-            for (let stdout of mns.stdout) ns.tprintf(`${c.cyan}${stdout}${c.reset}`);
-         }
+         if (mns.stdout)
+            for (let stdout of mns.stdout) ns.tprintf(`${c.cyan}${stdout}`);
       }
 
-   } else {
+   }
+   else
+   {
       ns.tprintf(`${c.red}`+
          'ERROR ARGS :: '+
             "\n\targs[0]->(STRING || regular expression),"+
             "\n\targs[1]->(STRING || valid file name)"+
-            "\n\nExiting !!!"+
-            `${c.reset}`
+            "\n\nExiting !!!"
       );
    }
 }
-
