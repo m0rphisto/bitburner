@@ -1,5 +1,5 @@
 /**
- * $Id: allstart.js v1.0 2023-08-20 22:52:47 6.05GB .m0rph $
+ * $Id: allstart.js v1.1 2023-08-21 22:59:00 6.05GB .m0rph $
  * 
  * description:
  *    Restarts all looper scripts on hacked and on purchased servers.
@@ -40,6 +40,9 @@ export async function main(ns) {
    hosts.forEach(a => ns.scan(a).forEach(b => b.match('pserv') ?? hosts.add(b).delete('home')));
    ['darkweb', 'The-Cave', 'w0r1d_d43m0n'].forEach(h => hosts.delete(h)); // Have 0GB but $0 max also
 
+   ns.tprintf(`${c.cyan}>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>`)
+   ns.tprintf(`${c.cyan}> API: Netscript - allstart run`)
+   ns.tprintf(`${c.cyan}>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>`)
    
    if (has_option(ns, '-s'))
    {
@@ -67,28 +70,28 @@ export async function main(ns) {
                      ns.tprintf(`${c.white}One of the H/G/W scripts active on ${host}. Trying to kill it ... ${ns.killall(host) ? 'OK' : 'FAILED'}.`);
                   } 
 
-                  ns.tprintf(`${c.cyan}Starting local ${master} for ${host}.${c.reset}`);
+                  ns.tprintf(`${c.white}Starting local ${master} for ${host}.`);
                   ns.run(master, 1, host);
                }
                else
                {
                   // ... and here the nullRAMers.
 
-                  ns.tprintf(`${c.cyan}Starting local ${weaken} ${host} -t ${threads}${c.reset}`);
+                  ns.tprintf(`${c.white}Starting local ${weaken} ${host} -t ${threads}`);
                   ns.run(weaken, threads, host);
                   await ns.sleep(1000);
          
-                  ns.tprintf(`${c.cyan}Starting local ${grow} ${host} -t ${threads}${c.reset}`);
+                  ns.tprintf(`${c.white}Starting local ${grow} ${host} -t ${threads}`);
                   ns.run(grow, threads, host);
                   await ns.sleep(1000);
                
-                  ns.tprintf(`${c.cyan}Starting local ${mhack} ${host} -t ${threads}${c.reset}`);
+                  ns.tprintf(`${c.white}Starting local ${mhack} ${host} -t ${threads}`);
                   ns.run(mhack, threads, host);
                   await ns.sleep(1000);
                }
             }
             else
-               ns.tprintf(`${c.magenta}No root access to ${host}, so not starting looper master !!!${c.reset}`);
+               ns.tprintf(`${c.magenta}No root access to ${host}, so not starting looper master !!!`);
          }
       }
    }
@@ -100,7 +103,7 @@ export async function main(ns) {
 
       let
          pservs = new Set(['home']);
-         pservs.forEach(a => ns.scan(a).forEach(b => b.match('pserv') && hosts.add(b).delete('home')));
+         pservs.forEach(a => ns.scan(a).forEach(b => b.match('pserv') && pservs.add(b).delete('home')));
 
       for (let pserv of pservs)
       {
@@ -110,7 +113,7 @@ export async function main(ns) {
             if (!ns.fileExists(file, pserv))
             {
                // Deploy purchased server.
-               ns.tprintf(`Copying ${file} to ${pserv}`);
+               ns.tprintf(`${c.white}Copying ${file} to ${pserv}`);
                ns.scp(file, pserv);
             }
          });
@@ -119,11 +122,14 @@ export async function main(ns) {
          ns.killall(pserv);
 
          // OK, starting the looper master.
-         ns.printf(`${c.cyan}${pserv}: Starting ${master} ${target} true${c.reset}`);
+         ns.tprintf(`${c.white}${pserv}: Starting ${master} ${target} true`);
          let pid = ns.exec(master, pserv, 1, ...[target, true]);
 
          if (pid == 0)
-            ns.printf(`${c.magenta}Could not start the looper master on ${pserv}.`);
+            ns.tprintf(`${c.magenta}Could not start the looper master on ${pserv}.`);
       }
    }
+
+   ns.tprintf(`${c.cyan}>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>`)
+   ns.tprintf(`${c.icyan}allstart run finished.`)
 }
