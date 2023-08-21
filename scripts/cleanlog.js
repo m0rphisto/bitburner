@@ -21,7 +21,8 @@ export async function main(ns) {
    'use strict';
 
    const
-      files = get_option(ns, '-f') ?? '',
+      files = get_option(ns, '-f') ?? '';
+   let
       data = `Cleanlog run started: ${d.getdate()}, ${d.gettime()}`;
 
    const rm_file = (file) => {
