@@ -1,7 +1,7 @@
 /** 
  * $Id: bdinstall.js v0.1 2023-08-21 07:34:08 CEST 7.80GB .m0rph $
  * 
- * descripttion:
+ * description:
  *    Get the complete network and backdoor already nuked servers.
  * 
  * @param {NS} ns
