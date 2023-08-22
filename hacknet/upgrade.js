@@ -1,5 +1,5 @@
 /**
- * $Id: upgrade.js v0.4 2023-08-20 04:10:54 6.70GB .m0rph $
+ * $Id: upgrade.js v0.5 2023-08-23 01:03:16 6.70GB .m0rph $
  * 
  * description:
  *    Automated hacknet node upgrade process.
@@ -22,7 +22,9 @@ const timestamp = d.timestamp();
 function log (ns, data, mode) {
    const m = mode ? mode : 'w';
    ns.print(`${c.cyan}${data}${c.reset}`);
-   ns.write(`/log/hacknet.upgrade.${timestamp}.js`, data, m);
+   //ns.write(`/log/hacknet.upgrade.${timestamp}.js`, data, m);
+   // A logfile is ONLY A STRING !!! At the end bitburner throws
+   // an 'invalid string size' error. We have to fix that!
 }
 
 const sleep_time = (money) => {
@@ -42,7 +44,7 @@ const max = {
    nodes: 30,
    level: 200, 
    ram:   64,
-   cores:  16
+   cores: 16
 };
 async function upgrade(ns, type)
 {
@@ -128,6 +130,9 @@ export async function main(ns) {
       await upgrade(ns, 'ram');
       await upgrade(ns, 'cores');
 
-      //await ns.sleep(6e4);
+      // We need this one second sleep, or the game will freeze
+      // in when it gets to the point, where allmost all hosts
+      // are at max(lvl,ram,cores). Really weird !!!
+      await ns.sleep(1e3);
    }
 }
