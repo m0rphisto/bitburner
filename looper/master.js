@@ -1,5 +1,5 @@
 /**
- * $Id: master.js v0.3 2023-08-06 15:46:42 CEST 6.95GB .m0rph $
+ * $Id: master.js v0.5 2023-08-24 16:06:13 CEST 7.05GB .m0rph $
  * 
  * Description:
  *    This is the looper master, that utilizes looper/{hack,grow,weaken}.js
@@ -45,7 +45,6 @@ export function autocomplete(data, args) {
 export async function main(ns) {
 
    'use strict';
-
 
    /**
     * Error exit handler.
@@ -128,15 +127,20 @@ export async function main(ns) {
 // DEBUG
 //exit(`target: ${target}, base: ${base},  sself: ${sself}, args: ${args}`);
 
-   // At first we need to manipulate the log-window's title bar.
-   ns.setTitle(`.m0rph@${ns.getHostname()}:/looper/master.js ${target} ${base}`)
+
+   let money, sec, cmd, pid = 0;
 
    // For the case the target server has no RAM, we have to trow an error!
    if (max_ram < 1)
       exit(`The target's maxRam is at ${ns.formatRam(max_ram)}! You should consider looping local.`)
 
+   // For the case the target has no max money, it makes no sense to hack this one.
+   if (max_money == 0)
+      exit(`The target's maxMoney is at ${ns.formatNumber(max_money)}! Hacking this one makes no sense.`)
 
-   let money, sec, cmd, pid = 0;
+
+   // At first we need to manipulate the log-window's title bar.
+   ns.setTitle(`.m0rph@${ns.getHostname()}:/looper/master.js ${target} ${base}`);
 
    // At the beginning we start a weaken script ...
    cmd = weaken;
