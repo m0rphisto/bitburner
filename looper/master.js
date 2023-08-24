@@ -132,11 +132,11 @@ export async function main(ns) {
 
    // For the case the target server has no RAM, we have to trow an error!
    if (max_ram < 1)
-      exit(`The target's maxRam is at ${ns.formatRam(max_ram)}! You should consider looping local.`)
+      exit(`${target}'s maxRam is at ${ns.formatRam(max_ram)}! You should consider looping local.`)
 
    // For the case the target has no max money, it makes no sense to hack this one.
    if (max_money == 0)
-      exit(`The target's maxMoney is at ${ns.formatNumber(max_money)}! Hacking this one makes no sense.`)
+      exit(`${target}'s maxMoney is at ${ns.formatNumber(max_money)}! Hacking this one makes no sense.`)
 
 
    // At first we need to manipulate the log-window's title bar.
