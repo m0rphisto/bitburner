@@ -1,5 +1,5 @@
 /**
- * $Id: allstart.js v1.1 2023-08-21 22:59:00 6.05GB .m0rph $
+ * $Id: allstart.js v1.2 2023-08-25 19:24:02 6.05GB .m0rph $
  * 
  * description:
  *    Restarts all looper scripts on hacked and on purchased servers.
@@ -55,9 +55,12 @@ export async function main(ns) {
          if (ns.getHackingLevel() >= ns.getServerRequiredHackingLevel(host))
          {
             // Only just in case the hosts wasn't already r00ted.
-            if (!ns.hasRootAccess(host)) ns.run(deploy, 1, host);
+            if (!ns.hasRootAccess(host)) await ns.run(deploy, 1, host);
             if ( ns.hasRootAccess(host))
             {
+               // BUT: We should await the deploy and master runs,
+               //      or we will get confusing output.
+
                if (ns.getServerMaxRam(host) > 0)
                {
                   // Here the servers that can hack themselves ...
@@ -71,23 +74,23 @@ export async function main(ns) {
                   } 
 
                   ns.tprintf(`${c.white}Starting local ${master} for ${host}.`);
-                  ns.run(master, 1, host);
+                  await ns.run(master, 1, host);
                }
                else
                {
                   // ... and here the nullRAMers.
 
                   ns.tprintf(`${c.white}Starting local ${weaken} ${host} -t ${threads}`);
-                  ns.run(weaken, threads, host);
-                  await ns.sleep(1000);
+                  await ns.run(weaken, threads, host);
+                  //await ns.sleep(1000);
          
                   ns.tprintf(`${c.white}Starting local ${grow} ${host} -t ${threads}`);
-                  ns.run(grow, threads, host);
-                  await ns.sleep(1000);
+                  await ns.run(grow, threads, host);
+                  //await ns.sleep(1000);
                
                   ns.tprintf(`${c.white}Starting local ${mhack} ${host} -t ${threads}`);
-                  ns.run(mhack, threads, host);
-                  await ns.sleep(1000);
+                  await ns.run(mhack, threads, host);
+                  //await ns.sleep(1000);
                }
             }
             else
