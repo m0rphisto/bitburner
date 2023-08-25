@@ -94,7 +94,7 @@ export async function main(ns) {
                }
             }
             else
-               ns.tprintf(`${c.magenta}No root access to ${host}, so not starting looper master !!!`);
+               ns.tprintf(`${c.magenta}No money or root access to ${host}, so not starting looper master !!!`);
          }
       }
    }
