@@ -56,7 +56,7 @@ export async function main(ns) {
          {
             // Only just in case the hosts wasn't already r00ted.
             if (!ns.hasRootAccess(host)) await ns.run(deploy, 1, host);
-            if ( ns.hasRootAccess(host) && h.moneyMax > 0)
+            if ( ns.hasRootAccess(host) && ns.getServerMaxMoney(host) > 0)
             {
                // BUT: We should await the deploy and master runs,
                //      or we will get confusing output.
