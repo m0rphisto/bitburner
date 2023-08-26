@@ -1,50 +1,92 @@
 /** 
- * filename: purchtest.js
- *     date: 2023-07-10
- *  version: 0.2
- *   author: .m0rph
- *      RAM: 4.25GB
+ * $Id: purchtest.js v0.3 2023-08-26 04:40:52 8.15GB .m0rph $
+ * 
+ * description:
+ *    Calculate and display how much much an upgrade or the purchase of
+ *    a given number of server is.
+ * 
+ * Options:
+ *    -p       purchase new servers
+ *    -u       upgrade existing servers
+ *    -r 8192  8192GB of RAM (default is 512)
+ *    -c 25    Calculate for a count of 25 servers (default is 1)
+ * 
+ * Examples:
+ *    -p -r 512 -c 15   Calculate for a count of 15 servers at a RAM size of 512GB.
+ *    -u -r 512         Calculate for the upgrade of all owned servers to 1TB RAM.
+ * 
  * 
  * @param {NS} ns
- *             ns.args[0]  number   RAM size
- *             ns.args[1]  number   Server count to purchase (complete price for n servers)
  */
 
 import {c} from '/modules/colors.js';
-import {a} from '/modules/arguments.js';
+import {
+   is_integer,
+   has_option,
+   get_option
+} from '/modules/arguments.js';
 
 export async function main(ns) {
 
-   if (ns.args.length > 0) {
-      
-      let num = (a.count(ns.args, 2) && a.int(ns.args[1])) ? ns.args[1] : 0;
-
-      if (a.int(ns.args[0])) {
-         const ram   = ns.args[0];
-         const money = ns.formatNumber(ns.getServerMoneyAvailable('home'));
-         const cost  = ns.getPurchasedServerCost(ram);
-         const limit = ns.getPurchasedServerLimit();
-         const buyed = ns.getPurchasedServers().length;
-         const max   = ns.getPurchasedServerLimit();
-         
-         //const cyan  = "\u001b[36m";
-         //const reset = "\u001b[0m"
-
-         ns.tprintf(`${c.cyan}We have \$%s available.${c.reset}`, money);
-         ns.tprintf(`${c.cyan}A server at %s RAM costs \$%s.${c.reset}`, ns.formatRam(ram), ns.formatNumber(cost));
-         ns.tprintf(`${c.cyan}We have buyed %s of %s servers yet.${c.reset}`, (buyed != '') ? buyed : 'none', max);
-         if (num > 0)
-            ns.tprintf(`${c.cyan}%d servers will cost \$%s.${c.reset}`, num, ns.formatNumber(cost * num));
-
-      } else {
-         ns.tprint(
-            "ERROR ARGS :: "+
-               "\n\targs[0]->(INTEGER || valid RAM size),"+
-               "\n\targs[1]->(INTEGER || valid server count [optional])"+
-               "\n\nExiting !!!"
-         );
-      }
-   } else {
-      ns.tprintf(`${c.red}No arguments passed. Exiting !!!${c.reset}`);
+   const exit = (msg) => {
+      ns.tprintf(`${c.red}${msg}`);
+      ns.exit();
    }
+
+   if (! ns.args.length > 0) exit('No arguments passed.');
+
+   const
+      opt = has_option(ns, '-p') 
+         ? 'purchase'
+         : has_option(ns, '-u')
+            ? 'upgrade'
+            : undefined,
+      ram = get_option(ns, '-r') ?? 512,
+      num = get_option(ns, '-c') ?? 1;
+
+   
+   if (! opt && !is_integer(ram) && !is_integer(num)) exit(
+      'ERROR ARGS :: '+
+         '\n\t-r INT->(valid RAM size),'+
+         '\n\t-c INT->(valid server count [optional])'+
+         '\n\nExiting !!!'
+   );
+
+   const
+      money = ns.formatNumber(ns.getServerMoneyAvailable('home')),
+      buyed = ns.getPurchasedServers().length,
+      max   = ns.getPurchasedServerLimit();
+ 
+   const mode = {
+      purchase (ram, num) {
+         const cost = ns.getPurchasedServerCost(ram);
+         ns.tprintf(`${c.cyan}A purchased server at ${ns.formatRam(ram)} RAM costs \$${ns.formatNumber(cost)}.`);
+         ns.tprintf(`${c.cyan}${num} purchased servers will cost \$${ns.formatNumber(cost * num)}`);
+      },
+      upgrade (ram) {
+         let
+            cost = 0,
+            pservs = new Set(['home']);
+            pservs.forEach(a => ns.scan(a).forEach(b => b.match('pserv') && pservs.add(b).delete('home')));
+         
+         for (let pserv of pservs)
+         {
+            const ps = ns.getServer(pserv);
+ 
+            if (ps.maxRam < ram)
+            {
+               const rc = ns.getPurchasedServerUpgradeCost(pserv, ram);
+               ns.tprintf(`${c.cyan}An upgrade for ${pserv} at ${ns.formatRam(ps.maxRam)} RAM costs \$${ns.formatNumber(rc)}.`);
+               cost += rc;
+            }
+         }
+         cost == 0
+            ? ns.tprintf(`${c.cyan}There is no need for RAM upgrade to ${ns.formatRam(ram)}.`)
+            : ns.tprintf(`${c.cyan}The complete RAM upgrade for all servers will cost \$${ns.formatNumber(cost)}.`);
+      }
+   }
+
+   ns.tprintf(`${c.cyan}We have \$${money} available.`);
+   ns.tprintf(`${c.cyan}We have buyed ${buyed != '' ? buyed : 'none'} of ${max} servers yet.`);
+   mode[opt](ram, num);
 }
