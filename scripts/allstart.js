@@ -1,5 +1,5 @@
 /**
- * $Id: allstart.js v1.2 2023-08-25 19:24:02 6.05GB .m0rph $
+ * $Id: allstart.js v1.3 2023-08-27 10:46:16 6.25GB .m0rph $
  * 
  * description:
  *    Restarts all looper scripts on hacked and on purchased servers.
@@ -21,6 +21,7 @@
  */
 
 import {c} from '/modules/colors.js';
+import {exit, header, footer} from '/modules/helpers.js';
 import {has_option, get_option} from '/modules/arguments.js';
 
 export async function main(ns) {
@@ -40,9 +41,7 @@ export async function main(ns) {
    hosts.forEach(a => ns.scan(a).forEach(b => b.match('pserv') ?? hosts.add(b).delete('home')));
    ['darkweb', 'The-Cave', 'w0r1d_d43m0n'].forEach(h => hosts.delete(h)); // Have 0GB but $0 max also
 
-   ns.tprintf(`${c.cyan}>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>`)
-   ns.tprintf(`${c.cyan}> API: Netscript - allstart run`)
-   ns.tprintf(`${c.cyan}>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>`)
+   header(ns, 'ns', 'allstart run');
    
    if (has_option(ns, '-s'))
    {
@@ -94,7 +93,7 @@ export async function main(ns) {
                }
             }
             else
-               ns.tprintf(`${c.magenta}No money or root access to ${host}, so not starting looper master !!!`);
+               ns.tprintf(`${c.magenta}No money or root access or to ${host}, so not starting looper master !!!`);
          }
       }
    }
@@ -103,6 +102,8 @@ export async function main(ns) {
    if (has_option(ns, '-p'))
    {
       const target = get_option(ns, '--target')  ?? 'n00dles';
+
+      ns.serverExists(target) || exit(ns, "Target server doesn't exist.");
 
       let
          pservs = new Set(['home']);
@@ -133,6 +134,5 @@ export async function main(ns) {
       }
    }
 
-   ns.tprintf(`${c.cyan}>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>`)
-   ns.tprintf(`${c.icyan}allstart run finished.`)
+   footer(ns, 'allstart run finished.');
 }
