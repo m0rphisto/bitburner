@@ -54,17 +54,14 @@ export function log(ns, file = '/log/syslog.js', data = '', mode = 'a', tail = !
 export function trace(ns, host, last, target, path = [])
 {
    let found = !!0;
-
    if (host.toLowerCase().includes(target.toLowerCase())) found = !!1;
-
    let fnd, hosts = ns.scan(host);
 
    for (let i = 0; i < hosts.length; i++)
    {
-	   if (hosts[i] != last)
+      if (hosts[i] != last)
       {
          [fnd, path] = trace(ns, hosts[i], host, target, path);
-
          if (fnd) found = !!1;
       }
    }
