@@ -1,7 +1,7 @@
 /** 
- * $Id: bdinstall.js v0.1 2023-08-21 07:34:08 CEST 7.80GB .m0rph $
+ * $Id: bdinstall.js v0.2 2023-08-27 11:24:56 CEST 7.80GB .m0rph $
  * 
- * description:
+ * descripttion:
  *    Get the complete network and backdoor already nuked servers.
  * 
  * @param {NS} ns
@@ -9,31 +9,7 @@
 
 import {c} from '/modules/colors.js';
 import {d} from '/modules/datetime.js';
-
-/**
- * https://steamcommunity.com/app/1812820/discussions/0/3200369647705810506/
- * 
- * A very useful recursive function for tracing the route to a given host.
- * Found on the steam forum: original by @MrFailSauce
- */
-
-let path = [];
-const get_path = (ns, host, lasthost, target) => {
-
-   let found = !!0;
-
-   if (host.toLowerCase().includes(target.toLowerCase())) found = !!1;
-
-   let hosts = ns.scan(host);
-
-   for (let i = 0; i < hosts.length; i++)
-      if (hosts[i] != lasthost)
-         if (get_path(ns, hosts[i], host, target)) found = !!1;
-
-   if (found) path.unshift(host);
-
-   return found;
-};
+import {header, footer, trace} from '/modules/helpers.js'
 
 export async function main(ns) {
 
@@ -47,21 +23,18 @@ export async function main(ns) {
    network.forEach(a => ns.scan(a).forEach(b => b.match('pserv') ?? network.add(b).delete('home')));
    network.delete('w0r1d_d43m0n'); // We should NOT backdoor this one. Not yet!
 
-   ns.tprintf(`${c.cyan}>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>`);
-   ns.tprintf(`${c.cyan}> API: Singularity - backdoor run started at: ${d.getdate()}, ${d.gettime()}`);
-   ns.tprintf(`${c.cyan}>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>`);
+   header(ns, 'si', `backdoor run started at: ${d.getdate()}, ${d.gettime()}`);
 
    for (let host of network)
    {
       const h = ns.getServer(host);
-      let target;
+      let found, target, path = [];
 
       if (h.hasAdminRights && !h.backdoorInstalled)
       {
-         ns.tprintf('');
          ns.tprintf(`${c.white}Will now try to install backdoor on ${h.hostname} ...`);
          ns.tprintf(`${c.white}Tracing path to host ...`);
-         get_path(ns, 'home', '', h.hostname);
+         [found, path] = trace(ns, 'home', '', h.hostname);
 
          while (target = path.shift())
          {
@@ -71,7 +44,7 @@ export async function main(ns) {
                
                if (target == h.hostname)
                {
-                  ns.tprintf(`${c.white}Installing backdoor ....`);
+                  ns.tprintf(`${c.white}Installing backdoor ...`);
                   await ns.singularity.installBackdoor();
                }
             }
@@ -80,6 +53,5 @@ export async function main(ns) {
       }
    }
 
-   ns.tprintf(`${c.cyan}>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>`);
-   ns.tprintf(`${c.icyan}Backdoor run finished.`);
+   footer(ns, 'Backdoor run finished.');
 }

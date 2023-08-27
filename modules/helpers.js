@@ -1,5 +1,5 @@
 /**
- * $Id: helpers.js v0.1 2023-08-27 10:47:55 1.60GB .m0rph $
+ * $Id: helpers.js v0.2 2023-08-27 10:47:55 1.60GB .m0rph $
  * 
  * description:
  *    A collection of little helper functions.
@@ -38,6 +38,39 @@ export function log(ns, file = '/log/syslog.js', data = '', mode = 'a', tail = !
 {
    tail && ns.print(`${c.cyan}${data}${c.reset}`);
    ns.write(file, `[${d.gettime()}] ${data}\n`, mode);
+}
+
+/**
+ * Recursive function for tracing the route to a given host.
+ *
+ * @param   {NS}      ns     The Netscript API.
+ * @param   {string}  host   The host where the path traversal starts.
+ * @param   {string}  last   The start path (last traverseal)
+ * @param   {string}  target The target server we want to trace.
+ * @param   {string}  path[] The path to the target server.
+ * @returns {boolean} found  Found the target?
+ */
+
+export function trace(ns, host, last, target, path = [])
+{
+   let found = !!0;
+
+   if (host.toLowerCase().includes(target.toLowerCase())) found = !!1;
+
+   let fnd, hosts = ns.scan(host);
+
+   for (let i = 0; i < hosts.length; i++)
+   {
+	   if (hosts[i] != last)
+      {
+         [fnd, path] = trace(ns, hosts[i], host, target, path);
+
+         if (fnd) found = !!1;
+      }
+   }
+   if (found) path.unshift(host);
+
+   return [found, path];
 }
 
 /**
