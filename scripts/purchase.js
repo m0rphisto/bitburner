@@ -1,9 +1,9 @@
 /** 
- * Id: purchase.js v0.7 2023-08-20 17:00:54 8.45GB .m0prh $
+ * Id: purchase.js v0.8 2023-08-28 09:00:22 8.45GB .m0prh $
  * 
  * Options:
  *    -r [0-9]+   RAM for server to purchase
- *    -m [0-9]+   Maximum count of servers to purchase
+ *    -c [0-9]+   Maximum count of servers to purchase
  * 
  * Note:
  *    Script usable AFTER the first home server RAM upgrade !!!
@@ -29,7 +29,7 @@ export async function main(ns) {
          '/looper/weaken.js', '/looper/grow.js', '/looper/hack.js', master
       ],
       ram      = get_option(ns, '-r') ?? 8192,
-      max      = get_option(ns, '-m') ?? 25,
+      max      = get_option(ns, '-c') ?? 25,
       cost     = ns.getPurchasedServerCost(ram),  // 0.25GB
       start    = ns.getPurchasedServers().length; // 2.25GB
 
@@ -67,7 +67,7 @@ export async function main(ns) {
          }
       }
       else
-         ns.printf(`${c.cyan}SeverCost is at ${ns.formatNumber(cost)}. Not enough money. Waiting ...${c.reset}`); 
+         ns.printf(`${c.white}SeverCost is at ${ns.formatNumber(cost)}. Not enough money. Waiting ...${c.reset}`); 
 
       // We need to wait for a second, otherwise the script will
       // fall into an infinite loop and the game will crash!
