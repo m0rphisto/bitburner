@@ -16,6 +16,6 @@ export async function main(ns) {
    [found, path] = trace(ns, 'home', '', ns.args[0]);
 
    header(ns, 'ns', 'traceroute');
-   for (let host of path) ns.tprintf(`${c.white}${++i} ${ns.getServer(host).ip}\t${host}`);
-   footer(ns, `${ns.args[0]} is ${i} hops away.`);
+   for (let host of path) ns.tprintf(`${c.white}${i++} ${ns.getServer(host).ip}\t${host}`);
+   footer(ns, `${ns.args[0]} is ${i - 1} hops away.`);
 }
