@@ -1,5 +1,5 @@
 /**
- * $Id: helpers.js v0.2 2023-08-27 10:47:55 1.60GB .m0rph $
+ * $Id: helpers.js v0.2 2023-08-28 07:55:23 2.10GB .m0rph $
  * 
  * description:
  *    A collection of little helper functions.
@@ -42,7 +42,7 @@ export function log(ns, file = '/log/syslog.js', data = '', mode = 'a', tail = !
 
 /**
  * Recursive function for tracing the route to a given host.
- *
+ * 
  * @param   {NS}      ns     The Netscript API.
  * @param   {string}  host   The host where the path traversal starts.
  * @param   {string}  last   The start path (last traverseal)
@@ -50,7 +50,6 @@ export function log(ns, file = '/log/syslog.js', data = '', mode = 'a', tail = !
  * @param   {string}  path[] The path to the target server.
  * @returns {boolean} found  Found the target?
  */
-
 export function trace(ns, host, last, target, path = [])
 {
    let found = !!0;
@@ -59,7 +58,7 @@ export function trace(ns, host, last, target, path = [])
 
    for (let i = 0; i < hosts.length; i++)
    {
-      if (hosts[i] != last)
+	   if (hosts[i] != last)
       {
          [fnd, path] = trace(ns, hosts[i], host, target, path);
          if (fnd) found = !!1;
@@ -71,13 +70,40 @@ export function trace(ns, host, last, target, path = [])
 }
 
 /**
+ * How many free RAM do we have, to run a script?
+ * 
+ * @depends '/modules/colors.js'
+ * 
+ * @param   {NS}      ns      The Netscript API.
+ * @param   {string}  script  The that should be run.
+ * @param   {integer} threads The thread multiplier. (default: 1)
+ * @param   {string}  server  The server on which the script to run. (default: home)
+ * @returns {boolean} Enough  RAM available? 
+ */
+export function free(ns, script, threads = 1, server = 'home')
+{
+   if (! ns.fileExists(script, server))
+   {
+      ns.tprintf(`${c.red}[ERROR] ${script} does not exist.`);
+      return !!0;
+   }
+   if (ns.getScriptRam(script, server) * threads > ns.getServerMaxRam(server) - ns.getServerUsedRam(server))
+   {
+      ns.tprintf(`${c.magenta}Sorry, we need more free RAM. Cannot start ${script} !!!`);
+      return !!0;
+   }
+
+   return !!1;
+}
+ 
+/**
  * Script header. Gives an info about the script and the used API.
  * 
  * @depends '/modules/colors.js'
  * 
  * @param {NS}     ns  The Netscript API.
  * @param {string} api The API key.
- * @param {string} msg The API key.
+ * @param {string} msg The header message.
  */
 export function header(ns, api = 'ns', msg = '')
 {

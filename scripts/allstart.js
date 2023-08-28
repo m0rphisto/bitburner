@@ -1,5 +1,5 @@
 /**
- * $Id: allstart.js v1.3 2023-08-27 10:46:16 6.25GB .m0rph $
+ * $Id: allstart.js v1.4 2023-08-28 07:32:58 6.40GB .m0rph $
  * 
  * description:
  *    Restarts all looper scripts on hacked and on purchased servers.
@@ -21,7 +21,7 @@
  */
 
 import {c} from '/modules/colors.js';
-import {exit, header, footer} from '/modules/helpers.js';
+import {exit, free, header, footer} from '/modules/helpers.js';
 import {has_option, get_option} from '/modules/arguments.js';
 
 export async function main(ns) {
@@ -73,23 +73,20 @@ export async function main(ns) {
                   } 
 
                   ns.tprintf(`${c.white}Starting local ${master} for ${host}.`);
-                  await ns.run(master, 1, host);
+                  free(ns, master) && await ns.run(master, 1, host);
                }
                else
                {
                   // ... and here the nullRAMers.
 
                   ns.tprintf(`${c.white}Starting local ${weaken} ${host} -t ${threads}`);
-                  await ns.run(weaken, threads, host);
-                  //await ns.sleep(1000);
+                  free(ns, weaken, threads) && await ns.run(weaken, threads, host);
          
                   ns.tprintf(`${c.white}Starting local ${grow} ${host} -t ${threads}`);
-                  await ns.run(grow, threads, host);
-                  //await ns.sleep(1000);
+                  free(ns, grow, threads) && await ns.run(grow, threads, host);
                
                   ns.tprintf(`${c.white}Starting local ${mhack} ${host} -t ${threads}`);
-                  await ns.run(mhack, threads, host);
-                  //await ns.sleep(1000);
+                  free(ns, mhack, threads) && await ns.run(mhack, threads, host);
                }
             }
             else
