@@ -1,5 +1,5 @@
 /**
- * $Id: helpers.js v0.2 2023-08-28 07:55:23 2.10GB .m0rph $
+  * $Id: helpers.js v0.2 2023-08-28 07:55:23 2.10GB .m0rph $
  * 
  * description:
  *    A collection of little helper functions.
@@ -95,6 +95,42 @@ export function free(ns, script, threads = 1, server = 'home')
 
    return !!1;
 }
+
+
+/**
+ * Get the next target for attacks.
+ *
+ * @depends '/modules/colors.js'
+ *
+ * @param   {NS}     ns       The Netscript API.
+ * @returns {string} target   The next target
+ */
+export function get_next(ns)
+{
+   let target, register = 0, t = new Set(['home']);
+
+   t.forEach(a => ns.scan(a).forEach(b => b.match('pserv') ?? t.add(b).delete('home')));
+   t.forEach(a => {
+
+      if (ns.hasRootAccess(a))
+      {
+         // We only need to check, if we're root.
+
+         if (ns.getHackingLevel() >= ns.getServerRequiredHackingLevel(a) || ns.hasRootAccess(a))
+         {
+            const
+               hack_lvl_need = ns.getHackingLevel() * 0.5 >= ns.getServerRequiredHackingLevel(a),
+               hack_factor   = ns.getServerMaxMoney(a) / (ns.getServerMinSecurityLevel(a) + 1),
+               weight = (hack_lvl_need ? ns.getHackingLevel() : 0) * hack_factor;
+
+            target   = register < weight ? a      : target,
+            register = register < weight ? weight : register;
+         }
+      }
+   });
+   return target;
+}
+
  
 /**
  * Script header. Gives an info about the script and the used API.
