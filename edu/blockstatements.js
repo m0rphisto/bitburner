@@ -57,11 +57,13 @@ export async function main(ns) {
    }
    */
    const run_it = () => {
+      ns.tprintf('OK, this works: expression && function_call(), or !expression || function_call().');
       return '\n'+
          'This is within a simple { ... } so called anonymous block.\n'+
          "OK, sorry! That doesn't work. We now use a lambda function.";
    }
    x < y && run_it();
+   x > y || run_it();
    try {
       ns.tprintf(`true_block returned by run_it(): ${run_it()}`);
       ns.tprintf(`true_block after all: ${true_block}`); // throws an error!
