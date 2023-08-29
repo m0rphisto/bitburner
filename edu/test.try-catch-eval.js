@@ -164,7 +164,7 @@ export async function main(ns) {
    For security reasons NEVER use a try { eval() } catch() { ... }.
                                           ^^^^^^
 
-   For sure, it is a very handy, fast coded but massivley insecure,
+   For sure, it is a very handy, fast coded but massivley insecure way,
    because we always have to keep Cross Site Scripting in mind,
    where an attacker tries to inject his JavaScript code into the
    site displayed in the other tabs, other frames or whaterver.
