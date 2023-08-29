@@ -4,6 +4,18 @@ export async function main(ns) {
    var y = 2;
    const z = 3;
 
+   /**
+    * Here a, for many people very confusing var/let/const problem comes up. ;-)
+    * The var declaration is GLOBAL! So, with a var declaration within a block
+    * or function (etc.) you can override variables!!!
+    *
+    * This is useful in some cases, indeed. For instance when I develop modules
+    * and I do not have space for passing values, because I want to work with
+    * (maybe) literal created objects or expensive classes, Or when I do not
+    * want to confuse myself during development, because it makes the
+    * debugging significantly harder.
+    */
+
    ns.tprintf(`let x = 1: ${x}`);
    ns.tprintf(`var y = 2: ${y}`);
    ns.tprintf(`const z = 3: ${z}`);
