@@ -32,10 +32,10 @@ const sleep_time = (money) => {
    switch (true)
    {
       // We do not need to wait for long, if there's enough money.
-      case money > 10e6:  return 3e4; // 30  sec
-      case money > 100e6: return 1e4; // 10  sec
-      case money > 1e9:   return 1e3; // 1   sec
       case money > 100e9: return 500; // 0.5 sec 
+      case money > 1e9:   return 1e3; // 1   sec
+      case money > 100e6: return 1e4; // 10  sec
+      case money > 10e6:  return 3e4; // 30  sec
       default:
          return 6e4; // 1 min
    }
@@ -81,9 +81,6 @@ async function upgrade(ns, type)
             'ram'   (i) { return ns.hacknet.upgradeRam(i)   },
             'cores' (i) { return ns.hacknet.upgradeCore(i)  }
          };
-         //log(ns, `[${d.gettime()}] DEBUG - cost[${type}](i) - ${cost[type](i)}\n`, 'a');
-         //log(ns, `[${d.gettime()}] DEBUG - stats[${type}] - `+stats[type]+` :: max[type] - ${max[type]}\n`, 'a');
-         //log(ns, `[${d.gettime()}] DEBUG - is_time = ${is_time[type]()}\n`, 'a');
 
          if (is_money > cost[type](i) && stats[type] < max[type] &&  (stats.level == max.level || is_time[type]()))
          {
