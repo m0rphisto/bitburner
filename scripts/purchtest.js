@@ -1,5 +1,5 @@
 /** 
- * $Id: purchtest.js v0.3 2023-08-26 04:40:52 8.15GB .m0rph $
+ * $Id: purchtest.js v0.4 2023-08-29 15:36:25 8.15GB .m0rph $
  * 
  * description:
  *    Calculate and display how much much an upgrade or the purchase of
@@ -34,6 +34,7 @@ export async function main(ns) {
    }
 
    if (! ns.args.length > 0) exit('No arguments passed.');
+   if (!has_option(ns, '-p') && !has_option(ns, '-u')) exit('Purchase or upgrade? What shall we do?');
 
    const
       opt = has_option(ns, '-p') 
