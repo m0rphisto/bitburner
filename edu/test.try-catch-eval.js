@@ -157,6 +157,22 @@ export async function main(ns) {
    227 [ x 64 = 14,528 bits ] waste, only not to get in trouble, THAT is
    a thing I do care about.
 
+   ######################################################################
+
+   BUT, BUT, BUT !!!
+
+   For security reasons NEVER use a try { eval() } catch() { ... }.
+                                          ^^^^^^
+
+   For sure, it is a very handy, fast coded but massivley insecure,
+   because we always have to keep Cross Site Scripting in mind,
+   where an attacker tries to inject his JavaScript code into the
+   site displayed in the other tabs, other frames or whaterver.
+
+   We better should create object and can then call the methods via
+   variables, as shown in the example above. ;-)
+
+      --> ns[port.toLowerCase()](target);
 
    So long...
 

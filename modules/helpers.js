@@ -3,6 +3,11 @@
  * 
  * description:
  *    A collection of little helper functions.
+ *
+ * Note:
+ *    No need to use the 'use strict'; statement here!
+ *    Modules and classes are executed in strict mode
+ *    by default.
  */
 
 import {c} from '/modules/colors.js';
