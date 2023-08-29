@@ -1,5 +1,5 @@
 /**
- * $Id: upgrade.js v0.5 2023-08-23 01:03:16 6.70GB .m0rph $
+ * $Id: upgrade.js v0.6 2023-08-29 04:52:12 6.70GB .m0rph $
  * 
  * description:
  *    Automated hacknet node upgrade process.
