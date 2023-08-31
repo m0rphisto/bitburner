@@ -1,5 +1,5 @@
 /**
- * $Id: deploy.js v1.0 2023-08-31 16:22:00 CEST 8.05GB .m0rph $
+ * $Id: deploy.js v0.4 2023-08-04 14:21:08 CEST 8.05GB .m0rph $
  * 
  *
  * description:
@@ -78,7 +78,7 @@ export async function main(ns) {
    const
       target  = ns.args[0],
       looper  = ns.args[1] ?? undefined,
-      files   = ['/looper/hack.js', '/looper/grow.js', '/looper/weaken.js', '/modules/colors.js', '/modules/arguments.js', '/modules/datetime.js', '/modules/helpers.js'],
+      files   = ['/looper/hack.js', '/looper/grow.js', '/looper/weaken.js', '/modules/colors.js', '/modules/arguments.js', '/modules/datetime.js'],
       logfile = `/log/looper-deploy.${target}.${d.timestamp()}.js`;
 
    log(
@@ -96,8 +96,8 @@ export async function main(ns) {
 
       if (h.numOpenPortsRequired > 0) {
 
-         ns.deleteServer; // Just a little 2.25GB static RAM feed3r due to the try-catch 5x ns[port_opener]() ... 
-                          // Otherwise we have a static/synamic RAM allocation error.
+            ns.deleteServer; // Just a little 2.25GB static RAM feed3r due to the try-catch 5x ns[port_opener]() ...
+                             // Otherwise we have a static/synamic RAM allocation error
 
          const port_opener = ['BruteSSH', 'FTPCrack', 'HTTPWorm', 'relaySMTP', 'SQLInject'];
          const open_port   = (port) => {

@@ -1,5 +1,5 @@
 /**
- * $Id: allstart.js v1.4 2023-08-28 07:32:58 6.40GB .m0rph $
+ * $Id: allstart.js v1.5 2023-08-31 16:19:48 6.40GB .m0rph $
  * 
  * description:
  *    Restarts all looper scripts on hacked and on purchased servers.
@@ -40,6 +40,7 @@ export async function main(ns) {
    let hosts  = new Set(['home']); // Get a complete r00ted hosts list.
    hosts.forEach(a => ns.scan(a).forEach(b => b.match('pserv') ?? hosts.add(b).delete('home')));
    ['darkweb', 'The-Cave', 'w0r1d_d43m0n'].forEach(h => hosts.delete(h)); // Have 0GB but $0 max also
+   // Teporarily disabled n00dles due to looper-2 development.
 
    header(ns, 'ns', 'allstart run');
    
@@ -79,14 +80,17 @@ export async function main(ns) {
                {
                   // ... and here the nullRAMers.
 
-                  ns.tprintf(`${c.white}Starting local ${weaken} ${host} -t ${threads}`);
-                  free(ns, weaken, threads) && await ns.run(weaken, threads, host);
+                  //ns.tprintf(`${c.white}Starting local ${weaken} ${host} -t ${threads}`);
+                  //free(ns, weaken, threads) && await ns.run(weaken, threads, host);
          
-                  ns.tprintf(`${c.white}Starting local ${grow} ${host} -t ${threads}`);
-                  free(ns, grow, threads) && await ns.run(grow, threads, host);
+                  //ns.tprintf(`${c.white}Starting local ${grow} ${host} -t ${threads}`);
+                  //free(ns, grow, threads) && await ns.run(grow, threads, host);
                
-                  ns.tprintf(`${c.white}Starting local ${mhack} ${host} -t ${threads}`);
-                  free(ns, mhack, threads) && await ns.run(mhack, threads, host);
+                  //ns.tprintf(`${c.white}Starting local ${mhack} ${host} -t ${threads}`);
+                  //free(ns, mhack, threads) && await ns.run(mhack, threads, host);
+
+                  ns.tprintf(`${c.white}Starting local ${master} for ${host}.`);
+                  free(ns, master) && await ns.run(master, 1, ...[host, true]);
                }
             }
             else
@@ -109,7 +113,7 @@ export async function main(ns) {
       for (let pserv of pservs)
       {
          [
-            '/modules/colors.js', '/modules/datetime.js', 'modules/arguments.js', weaken, grow, hack, master
+            '/modules/colors.js', '/modules/datetime.js', '/modules/arguments.js', '/modules/helpers.js', weaken, grow, hack, master
          ].forEach(file => {
             if (!ns.fileExists(file, pserv))
             {

@@ -1,5 +1,5 @@
 /**
- * $Id: master.js v0.5 2023-08-24 16:06:13 CEST 7.05GB .m0rph $
+ * $Id: master.js v1.0 2023-08-31 17:01:46 CEST 4.75GB .m0rph $
  * 
  * Description:
  *    This is the looper master, that utilizes looper/{hack,grow,weaken}.js
@@ -31,31 +31,50 @@
 
 import {c} from '/modules/colors.js';
 import {d} from '/modules/datetime.js';
-
+import {exit} from '/modules/helpers.js';
 import {
    has_count,
    is_string,
    is_boolean
 } from '/modules/arguments.js';
 
+
 export function autocomplete(data, args) {
    return [...data.servers];
+}
+
+class Job
+{
+   /**
+    * At the moment we do not really need an expensive class for this,
+    * but this looper will be the base for a batcher, respectively 
+    * proto-batcher coming soon.
+    *
+    * Inspiration found on:
+    *    https://darktechnomancer.github.io/
+    *
+    *    Thank you very much for this excellent beginner's guide!
+    *
+    *                            <(°)
+    *                             / \
+    *    Have a lot of fun ...    \ /
+    *                            ''''
+    */
+   constructor(type, target)
+   {
+      this.pid     = 0;       // The master PID
+      this.spid    = 0;       // The script PID
+      this.type    = type;    // The job type (H/G/W)
+      this.target  = target;  // The target to attack
+      this.threads = 1;       // The job's threads count
+   }
 }
 
 export async function main(ns) {
 
    'use strict';
 
-   /**
-    * Error exit handler.
-    * 
-    * @param {string}   msg   Error message.
-    */
-   function exit (msg) {
-      ns.tprintf(`${c.red}ERROR: ${msg} Exiting !!!${c.reset}`);
-      ns.exit();
-   }
-   
+   const DEV = '', MAX = 3212;
 
    /**
     * Kill the actual script on the target server.
@@ -65,19 +84,20 @@ export async function main(ns) {
    function kill (pid, cmd) {
       let retval, msg = `${d.gettime()}: Trying to kill pid(${pid}) ${cmd} ... `;
       retval = ns.kill(pid) ? 'OK' : 'FAILED';
-      ns.print(`${c.cyan}${msg}${retval}${c.reset}`);
+      ns.print(`${c.cyan}${msg}${retval}`);
       return retval == 'OK' ? true : false;
    }
+
 
    /**
     * At first the parameter validation.
     */
-   has_count(ns.args, 0) ? exit('No target passed') : null;
+   has_count(ns.args, 0) ? exit(ns, 'No target passed') : null;
 
    has_count(ns.args, 1)
       ? is_string(ns.args[0]) 
-         ? ns.serverExists(ns.args[0]) ? null : exit(`Target ${ns.args[0]} does not exist.`)
-         : exit(`ERROR :: ${ns.args[0]} :: String expected.`)
+         ? ns.serverExists(ns.args[0]) ? null : exit(ns, `Target ${ns.args[0]} does not exist.`)
+         : exit(ns, `ERROR :: ${ns.args[0]} :: String expected.`)
       : null;
 
    const sself =
@@ -86,126 +106,97 @@ export async function main(ns) {
             ? !!ns.args[1]
             : is_boolean(ns.args[1]) 
                ? ns.args[1]
-               : exit(`ERROR :: ${ns.args[1]} :: Bool integer or boolean expected.`)
+               : exit(ns, `ERROR :: ${ns.args[1]} :: Bool integer or boolean expected.`)
          : false;
 
    /**
     * Then the initialization section,
     */
    const
-      target         = ns.args[0];
-   
-   const
-      base           = sself ? ns.getHostname() : target,
-      args           = sself ? [target] : [''],
+      target    = ns.args[0],
+      base      = sself ? ns.getHostname() : target,
+      max_money = ns.getServerMaxMoney(target),
+      max_ram   = ns.getServerMaxRam(base),
+      has_ram   = max_ram - ns.getServerUsedRam(base);
 
-      hack           = '/looper/hack.js',
-      grow           = '/looper/grow.js',
-      weaken         = '/looper/weaken.js',
-      master         = '/looper/master.js';
-
-   const
-      min_security   = ns.getServerMinSecurityLevel(target),
-      max_money      = ns.getServerMaxMoney(target),
-      max_ram        = ns.getServerMaxRam(base);
-
-   const
-      has_ram        = max_ram - ns.getServerUsedRam(base),
-      weaken_ram     = ns.getScriptRam(weaken),
-      grow_ram       = ns.getScriptRam(grow),
-      hack_ram       = ns.getScriptRam(hack);
-
-   const
-      weaken_threads = Math.floor(has_ram / weaken_ram),
-      grow_threads   = Math.floor(has_ram / grow_ram),
-      hack_threads   = Math.floor(has_ram / hack_ram);
-
-   const
-      weaken_thresh  = min_security * 1.25,
-      money_thresh   = max_money    * 0.75;
-
-// DEBUG
-//exit(`target: ${target}, base: ${base},  sself: ${sself}, args: ${args}`);
-
-
-   let money, sec, cmd, pid = 0;
 
    // For the case the target server has no RAM, we have to trow an error!
    if (max_ram < 1)
-      exit(`${target}'s maxRam is at ${ns.formatRam(max_ram)}! You should consider looping local.`)
+      exit(ns, `${target}'s maxRam is at ${ns.formatRam(max_ram)}! You should consider looping local.`);
 
    // For the case the target has no max money, it makes no sense to hack this one.
    if (max_money == 0)
-      exit(`${target}'s maxMoney is at ${ns.formatNumber(max_money)}! Hacking this one makes no sense.`)
+      exit(ns, `${target}'s maxMoney is at ${ns.formatNumber(max_money)}! Hacking this one makes no sense.`);
+
+   // Want to inspect the running tail window? Manipulate the title bar.
+   ns.setTitle(`.m0rph@${ns.getHostname()}:/looper${DEV}/master.js ${target} ${base}`);
+
+   const
+      job      = {},
+      ports    = {},
+      scripts  = new Map(),
+      types    = ['weaken', 'grow', 'hack'];
 
 
-   // At first we need to manipulate the log-window's title bar.
-   ns.setTitle(`.m0rph@${ns.getHostname()}:/looper/master.js ${target} ${base}`);
+   for (let type of types)
+   {
+      scripts.set(type, `/looper${DEV}/${type}.js`);
+
+      job[type]         = new Job(type, target);
+      job[type].pid     = ns.pid;
+      job[type].target  = target;
+ 
+      let max = Math.floor(has_ram / ns.getScriptRam(scripts.get(type))); 
+      job[type].threads = base == 'home' && max > MAX ? MAX : max;
+   }
 
    // At the beginning we start a weaken script ...
-   cmd = weaken;
-   pid = ns.exec(cmd, base, weaken_threads, ...args);
-   ns.print(`${c.cyan}${d.gettime()}: Started pid(${pid}) ${cmd} on ${base}.${c.reset}`);
-   await ns.sleep(ns.getWeakenTime(target) * 1.15);
-   ns.deleteServer; // Just a little static RAM feed3r ... 2.25GB
+   let cmd = 'weaken';
+   sself || ns.killall(base);
+   job[cmd].spid = ns.exec(scripts.get(cmd), base, job[cmd].threads, JSON.stringify(job[cmd]));
+   ns.print(`${c.cyan}${d.gettime()}: Started pid(${job[cmd].spid}) ${cmd} on ${base}.`);
+   ports[cmd] = ns.getPortHandle(job[cmd].spid);
+   ports[cmd].clear();
 
-   for (;;) {
 
-      // And then we start monitoring.
+   for (;;)
+   {
+      await ports[cmd].nextWrite();
 
-      money = ns.getServerMoneyAvailable(target),
-      sec   = ns.getServerSecurityLevel(target);
+      if (1 === ports[cmd].read())
+      {
+         // OK, the worker sends a signal that the job is done.
 
-      if (money >= money_thresh) {
+         let next = 
+            ns.getServerSecurityLevel(target) >= ns.getServerMinSecurityLevel(target) * 1.25
+               ? 'weaken'
+               : ns.getServerMoneyAvailable(target) >= max_money * 0.75
+                  ? 'hack'
+                  : 'grow';
 
-         // Money threshold reached, so we hack the box.
+         if(next != cmd)
+         {
+            // We need a new job, so we kill the old one ...
 
-         //if (cmd != hack) {
-            if (kill(pid, cmd)) {
-               cmd = hack;
-               pid = ns.exec(cmd, base, hack_threads, ...args);
-               ns.print(`${c.cyan}${d.gettime()}: Started pid(${pid}) ${cmd} on ${base}.${c.reset}`);
-               await ns.sleep(ns.getHackTime(target) * 1.15);
+            if (kill(job[cmd].spid, scripts.get(cmd)))
+            {
+               // ... and start a new.
+
+               cmd = next;
+               sself || ns.killall(base);
+               job[cmd].spid = ns.exec(scripts.get(cmd), base, job[cmd].threads, JSON.stringify(job[cmd]));
+               ns.print(`${c.cyan}${d.gettime()}: Started pid(${job[cmd].pid}) ${cmd} on ${base}.`);
+               ports[cmd] = ns.getPortHandle(job[cmd].spid);
+               ports[cmd].clear();
+               //ns.writePort(ns.pid, 1);
             }
-            else {
-               ns.print(`${c.red}ERROR: Could not kill pid(${pid}) ${cmd} on ${base}. Exiting !!!${c.reset}`);
-               ns.exit();
-            }
-         //}
-      }
-      else if (sec >= weaken_thresh) {
+            else
+            {
+               // WOW, something went terribly wrong and we gotta get out.
 
-         // Too high security level, we have to weaken.
-
-         //if (cmd != weaken) {
-            if (kill(pid, cmd)) {
-               cmd = weaken;
-               pid = ns.exec(cmd, base, weaken_threads, ...args);
-               ns.print(`${c.cyan}${d.gettime()}: Started pid(${pid}) ${cmd} on ${base}.${c.reset}`);
-               await ns.sleep(ns.getWeakenTime(target) * 1.15);
+               exit(ns, `Could not kill pid(${job[cmd].pid}) ${scripts.get(cmd)} on ${base}.`);
             }
-              else {
-               ns.print(`${c.red}ERROR: Could not kill pid(${pid}) ${cmd} on ${base}. Exiting !!!${c.reset}`);
-               ns.exit();
-            }
-         //}
-      }
-      else {
-
-         // Otherwise grow to the max.
-
-         //if (cmd != grow) {
-            if (kill(pid, cmd)) {
-               cmd = grow;
-               pid = ns.exec(cmd, base, grow_threads, ...args);
-               ns.print(`${c.cyan}${d.gettime()}: Started pid(${pid}) ${cmd} on ${base}.${c.reset}`);
-               await ns.sleep(ns.getGrowTime(target) * 1.15);
-            }
-            else {
-               ns.print(`${c.red}ERROR: Could not kill pid(${pid}) ${cmd} on ${base}. Exiting !!!${c.reset}`);
-               ns.exit();
-            }
-         //}
+         }
       }
    }
 }
