@@ -29,12 +29,10 @@ export async function main(ns) {
    // System crashed? OK, let it run again.
 
    const 
-      threads = get_option(ns, '--threads') ?? 512, 
       deploy  = '/looper/deploy.js',
       master  = '/looper/master.js',
       weaken  = '/looper/weaken.js',
       grow    = '/looper/grow.js',
-      mhack   = '/looper/mhack.js',
       hack    = '/looper/hack.js';
 
    let hosts  = new Set(['home']); // Get a complete r00ted hosts list.
@@ -79,15 +77,6 @@ export async function main(ns) {
                else
                {
                   // ... and here the nullRAMers.
-
-                  //ns.tprintf(`${c.white}Starting local ${weaken} ${host} -t ${threads}`);
-                  //free(ns, weaken, threads) && await ns.run(weaken, threads, host);
-         
-                  //ns.tprintf(`${c.white}Starting local ${grow} ${host} -t ${threads}`);
-                  //free(ns, grow, threads) && await ns.run(grow, threads, host);
-               
-                  //ns.tprintf(`${c.white}Starting local ${mhack} ${host} -t ${threads}`);
-                  //free(ns, mhack, threads) && await ns.run(mhack, threads, host);
 
                   ns.tprintf(`${c.white}Starting local ${master} for ${host}.`);
                   free(ns, master) && await ns.run(master, 1, ...[host, true]);

@@ -10,7 +10,7 @@ export async function main(ns) {
    
    const master = JSON.parse(ns.args[0]);
 
-   while(true)
+   for(;;)
    {
       await ns.hack(master.target);
       ns.writePort(ns.pid, 1);
