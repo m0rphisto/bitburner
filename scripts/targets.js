@@ -1,5 +1,5 @@
 /** 
- * $Id: targets.js v0.6 2023-08-02 10:14:55 CEST 3.80GB .m0rph $
+ * $Id: targets.js v0.7 2023-09-01 10:27:32 CEST 3.80GB .m0rph $
  * 
  * descripttion:
  *    Get the r00ted and backdoored servers and log their stats.
@@ -27,8 +27,8 @@ export async function main(ns) {
 
       if (! h.purchasedByPlayer && h.hasAdminRights) {
 
-         line = sprintf(
-            `${h.hostname}: ram(${ns.formatRam(h.maxRam)}), max(\$${ns.formatNumber(h.moneyMax)}), hack(${h.requiredHackingSkill}), growth(${h.serverGrowth}), sec(${h.minDifficulty})`
+         line = ns.sprintf(
+            `${h.hostname}: ram(${ns.formatRam(h.maxRam)}), max($${ns.formatNumber(h.moneyMax)}), hack(${h.requiredHackingSkill}), growth(${h.serverGrowth}), sec(${h.minDifficulty})`
          );
                   
          ns.tprintf(`${h.maxRam == 0 ? c.red : c.cyan}${++i}) ${line}${c.reset}`);

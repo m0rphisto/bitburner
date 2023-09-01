@@ -1,5 +1,5 @@
 /** 
- * $Id: firstsub.js v0.3 2023-08-15 12:28:37 CEST 4.80GB .m0rph $
+ * $Id: firstsub.js v0.4 2023-09-01 09:06:41 CEST 4.80GB .m0rph $
  * 
  * description:
  *    After augmentation installation we have to start at the beginning,
@@ -56,10 +56,6 @@ export async function main(ns) {
          3: 9000
       };
 
-   //ns.tprintf(`ports: ${ports}, threads: ${threads}`)
-   //ns.exit();
-
-   //scanned.forEach(a => ns.scan(a).forEach(b => scanned.add(b).delete('home')));
    for (let i = 0; i < hosts[ports].length; i++)
    {
       let cmd, host = hosts[ports][i];
@@ -80,14 +76,14 @@ export async function main(ns) {
       if (ns.hasRootAccess(host))
       {
          // Any further actions only make sense, if we 0wned the box.
-         ns.tprintf(`${c.magenta}Did nuke() ${host}.${c.reset}`);
+         ns.tprintf(`${c.magenta}Did nuke() ${host}.`);
    
          if (ns.getServerMaxRam(host) > 0)
          {
             ns.run(deploy, 1, host);
             ns.run(looper, 1, host);
 
-            ns.tprintf(`${c.magenta}Did deploy ${host} and started the looper master.${c.reset}`);
+            ns.tprintf(`${c.magenta}Did deploy ${host} and started the looper master.`);
          }
          else
          {
@@ -95,34 +91,42 @@ export async function main(ns) {
             ns.run(grow,   threads, host); await ns.sleep(1000);
             ns.run(hack,   threads, host); await ns.sleep(1000);
 
-            ns.tprintf(`${c.magenta}Did locally start weaken(), grow() and mhack() for ${host}.${c.reset}`);
+            ns.tprintf(`${c.magenta}Did locally start weaken(), grow() and mhack() for ${host}.`);
          }
-
          switch (ports)
          {
             // Only hosts in home's subnet are directly connectable.
             case 0:
-               if (host == 'nectar-net')    { cmd = 'sigma-cosmetics; connect nectar-net'; break }
+               if (host == 'n00dles')         { cmd = 'n00dles'; break }
+               if (host == 'foodnstuff')      { cmd = 'foodnstuff'; break }
+               if (host == 'sigma-cosmetics') { cmd = 'sigma-cosmetics'; break }
+               if (host == 'joesguns')        { cmd = 'joesguns'; break }
+               if (host == 'hong-fang-tea')   { cmd = 'hong-fang-tea'; break }
+               if (host == 'harakiri-sushi')  { cmd = 'harakiri-sushi'; break }
+               if (host == 'nectar-net')      { cmd = 'n00dles; connect nectar-net'; break }
+               break;
             case 1:
-               if (host == 'zer0')          { cmd = 'n00dles; connect zer0'; break }
-               if (host == 'neo-net')       { cmd = 'n00dles; connect zer0; connect neo-net'; break }
-               if (host == 'max-hardware')  { cmd = 'hong-fang-tea; connect max-hardware'; break }
-               if (host == 'CSEC')          { cmd = 'hong-fang-tea; connect CSEC'; break }
+               if (host == 'max-hardware')    { cmd = 'joesguns; connect max-hardware'; break }
+               if (host == 'zer0')            { cmd = 'joesguns; connect zer0'; break }
+               if (host == 'CSEC')            { cmd = 'joesguns; connect CSEC'; break }
+               if (host == 'neo-net')         { cmd = 'joesguns; connect CSEC; connect neo-net'; break }
+               break;
             case 2:
-               if (host == 'silver-helix')  { cmd = 'n00dles; connect zer0; connect silver-helix'; break }
-               if (host == 'johnson-ortho') { cmd = 'n00dles; connect zer0; connect silver-helix; connect johnson-ortho'; break }
-               if (host == 'the-hub')       { cmd = 'n00dles; connect zer0; connect neo-net; connect the-hub'; break }
-               if (host == 'phantasy')      { cmd = 'sigma-cosmetics; connect nectar-net; connect phantasy'; break }
-               if (host == 'crush-fitness') { cmd = 'sigma-cosmetics; connect nectar-net; connect phantasy; connect crush-fitness'; break }
-               if (host == 'omega-net')     { cmd = 'sigma-cosmetics; connect nectar-net; connect omega-net'; break }
-               if (host == 'avmnite-02h')   { cmd = 'sigma-cosmetics; connect nectar-net; connect omega-net; connect avmnite-02h'; break }
+               if (host == 'silver-helix')    { cmd = 'n00dles; connect CSEC; connect silver-helix'; break }
+               if (host == 'johnson-ortho')   { cmd = 'n00dles; connect CSEC; connect silver-helix; connect johnson-ortho'; break }
+               if (host == 'phantasy')        { cmd = 'n00dles; connect CSEC; connect phantasy'; break }
+               if (host == 'the-hub')         { cmd = 'n00dles; connect CSEC; connect phantasy; connect the-hub'; break }
+               if (host == 'crush-fitness')   { cmd = 'n00dles; connect CSEC; connect neo-net; connect crush-fitness'; break }
+               if (host == 'avmnite-02h')     { cmd = 'n00dles; connect CSEC; connect neo-net; connect avmnite-02h'; break }
+               if (host == 'omega-net')       { cmd = 'joesguns; connect zer0; connect omega-net'; break }
+               break;
             case 3:
-               if (host == 'netlink')       { cmd = 'n00dles; connect zer0; connect silver-helix; connect netlink'; break }
-               if (host == 'catalyst')      { cmd = 'n00dles; connect zer0; connect neo-net; connect the-hub; connect catalyst'; break }
-               if (host == 'summit-uni')    { cmd = 'sigma-cosmetics; connect nectar-net; connect omega-net; connect avmnite-02h; connect summit-uni'; break }
-               if (host == 'computek')      { cmd = 'sigma-cosmetics; connect nectar-net; connect phantasy; connect computek'; break }
-               if (host == 'rothman-uni')   { cmd = 'sigma-cosmetics; connect nectar-net; connect phantasy; connect computek; connect rothman-uni'; break }
-               if (host == 'I.I.I.I')       { cmd = 'sigma-cosmetics; connect nectar-net; connect phantasy; connect crush-fitness; connect I.I.I.I'; break }
+               if (host == 'netlink')         { cmd = 'n00dles; connect CSEC; connect neo-net; connect netlink'; break }
+               if (host == 'I.I.I.I')         { cmd = 'n00dles; connect CSEC; connect neo-net; connect avmnite-02h; connect I.I.I.I'; break }
+               if (host == 'catalyst')        { cmd = 'n00dles; connect CSEC; connect silver-helix; connect johnson-ortho; connect catalyst'; break }
+               if (host == 'summit-uni')      { cmd = 'n00dles; connect CSEC; connect silver-helix; connect johnson-ortho; connect summit-uni'; break }
+               if (host == 'computek')        { cmd = 'joesguns; connect zer0; connect omega-net; connect computek'; break }
+               if (host == 'rothman-uni')     { cmd = 'joesguns; connect zer0; connect omega-net; connect computek; connect rothman-uni'; break }
          }
 
          if (cmd)
@@ -132,11 +136,11 @@ export async function main(ns) {
             shell(ccmd);
             await ns.sleep(sleep_time[ports]);
 
-            ns.tprintf(`${c.magenta}And finaly installed the backdoor on ${host}.${c.reset}`);
+            ns.tprintf(`${c.magenta}And finaly installed the backdoor on ${host}.`);
          }
       }
       else
-         ns.tprintf(`${c.magenta}Not able to nuke() ${host}. Check the darkweb !!!${c.reset}`);
+         ns.tprintf(`${c.magenta}Not able to nuke() ${host}. Check the darkweb !!!`);
    }
 }
 

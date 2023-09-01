@@ -61,8 +61,8 @@ export async function main(ns) {
    const mode = {
       purchase (ram, num) {
          const cost = ns.getPurchasedServerCost(ram);
-         ns.tprintf(`${c.cyan}A purchased server at ${ns.formatRam(ram)} RAM costs \$${ns.formatNumber(cost)}.`);
-         ns.tprintf(`${c.cyan}${num} purchased servers will cost \$${ns.formatNumber(cost * num)}`);
+         ns.tprintf(`${c.cyan}A purchased server at ${ns.formatRam(ram)} RAM costs $${ns.formatNumber(cost)}.`);
+         ns.tprintf(`${c.cyan}${num} purchased servers will cost $${ns.formatNumber(cost * num)}`);
       },
       upgrade (ram) {
          let
@@ -77,17 +77,17 @@ export async function main(ns) {
             if (ps.maxRam < ram)
             {
                const rc = ns.getPurchasedServerUpgradeCost(pserv, ram);
-               ns.tprintf(`${c.cyan}An upgrade for ${pserv} at ${ns.formatRam(ps.maxRam)} RAM costs \$${ns.formatNumber(rc)}.`);
+               ns.tprintf(`${c.cyan}An upgrade for ${pserv} at ${ns.formatRam(ps.maxRam)} RAM costs $${ns.formatNumber(rc)}.`);
                cost += rc;
             }
          }
          cost == 0
             ? ns.tprintf(`${c.cyan}There is no need for RAM upgrade to ${ns.formatRam(ram)}.`)
-            : ns.tprintf(`${c.cyan}The complete RAM upgrade for all servers will cost \$${ns.formatNumber(cost)}.`);
+            : ns.tprintf(`${c.cyan}The complete RAM upgrade for all servers will cost $${ns.formatNumber(cost)}.`);
       }
    }
 
-   ns.tprintf(`${c.cyan}We have \$${money} available.`);
+   ns.tprintf(`${c.cyan}We have $${money} available.`);
    ns.tprintf(`${c.cyan}We have buyed ${buyed != '' ? buyed : 'none'} of ${max} servers yet.`);
    mode[opt](ram, num);
 }

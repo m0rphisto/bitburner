@@ -1,5 +1,5 @@
 /** 
- * $Id: grep.js v0.3 2023-08-22 00:31:26 3.00GB .m0rph $
+ * $Id: grep.js v0.4 2023-09-01 09:13:58 3.00GB .m0rph $
  * 
  * descripttion:
  *    We simply need a unix grep !!!
@@ -12,7 +12,7 @@
 import {c} from '/modules/colors.js';
 import {a} from '/modules/arguments.js';
 
-export function autocomplete(data, args) {
+export function autocomplete(data) {
    return [...data.scripts];
 }
 
@@ -72,7 +72,7 @@ export async function main(ns) {
          let stdin = '',
              regex = new RegExp(this.regex);
 
-         while (stdin = this.stdin.shift())
+         while ((stdin = this.stdin.shift()))
             if (regex.test(stdin)) this.stdout.push(stdin);
       }
    };

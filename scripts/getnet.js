@@ -1,5 +1,5 @@
 /** 
- * $Id: getnet.js v0.7 2023-08-24 16:26:16 CEST 3.80GB .m0rph $
+ * $Id: getnet.js v0.8 2023-09-01 09:11:55 CEST 3.80GB .m0rph $
  * 
  * descripttion:
  *    First step: Get the complete network and write them to getnet.log.js.
@@ -27,7 +27,7 @@ export async function main(ns) {
 
       if (! h.purchasedByPlayer) {
 
-         line = sprintf(
+         line = ns.sprintf(
             `${h.hostname}: maxRam(${h.maxRam}), maxMoney(${ns.formatNumber(h.moneyMax)}), hack(${h.requiredHackingSkill}), ` + 
             `ports(${h.numOpenPortsRequired}), root(${(h.hasAdminRights)}), backdoor(${(h.backdoorInstalled)})`
          );

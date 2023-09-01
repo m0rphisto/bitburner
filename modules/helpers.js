@@ -1,9 +1,9 @@
 /**
-  * $Id: helpers.js v0.2 2023-08-28 07:55:23 2.10GB .m0rph $
+ * $Id: helpers.js v0.3 2023-09-01 08:26:24 2.50GB .m0rph $
  * 
  * description:
  *    A collection of little helper functions.
- *
+ * 
  * Note:
  *    No need to use the 'use strict'; statement here!
  *    Modules and classes are executed in strict mode
@@ -41,6 +41,7 @@ export function exit(ns, msg = '')
  */
 export function log(ns, file = '/log/syslog.js', data = '', mode = 'a', tail = !!0)
 {
+   mode = ns.fileExists(file) ? mode : 'w';
    tail && ns.print(`${c.cyan}${data}${c.reset}`);
    ns.write(file, `[${d.gettime()}] ${data}\n`, mode);
 }
@@ -63,7 +64,7 @@ export function trace(ns, host, last, target, path = [])
 
    for (let i = 0; i < hosts.length; i++)
    {
-	   if (hosts[i] != last)
+      if (hosts[i] != last)
       {
          [fnd, path] = trace(ns, hosts[i], host, target, path);
          if (fnd) found = !!1;
@@ -72,6 +73,40 @@ export function trace(ns, host, last, target, path = [])
    if (found) path.unshift(host);
 
    return [found, path];
+}
+
+/**
+ * Get the next target for attacks.
+ * 
+ * @depends '/modules/colors.js'
+ * 
+ * @param   {NS}     ns       The Netscript API.
+ * @returns {string} target   The next target
+ */
+export function get_next(ns)
+{
+   let target, register = 0, t = new Set(['home']);
+
+   t.forEach(a => ns.scan(a).forEach(b => b.match('pserv') ?? t.add(b).delete('home')));
+   t.forEach(a => {
+
+      if (ns.hasRootAccess(a))
+      {
+         // We only need to check, if we're root.
+         
+         if (ns.getHackingLevel() >= ns.getServerRequiredHackingLevel(a) || ns.hasRootAccess(a))
+         {
+            const 
+               hack_lvl_need = ns.getHackingLevel() * 0.5 >= ns.getServerRequiredHackingLevel(a),
+               hack_factor   = ns.getServerMaxMoney(a) / (ns.getServerMinSecurityLevel(a) + 1),
+               weight = (hack_lvl_need ? ns.getHackingLevel() : 0) * hack_factor;
+
+            target   = register < weight ? a      : target,
+            register = register < weight ? weight : register;
+         }      
+      }
+   });
+   return target;
 }
 
 /**
@@ -100,42 +135,6 @@ export function free(ns, script, threads = 1, server = 'home')
 
    return !!1;
 }
-
-
-/**
- * Get the next target for attacks.
- *
- * @depends '/modules/colors.js'
- *
- * @param   {NS}     ns       The Netscript API.
- * @returns {string} target   The next target
- */
-export function get_next(ns)
-{
-   let target, register = 0, t = new Set(['home']);
-
-   t.forEach(a => ns.scan(a).forEach(b => b.match('pserv') ?? t.add(b).delete('home')));
-   t.forEach(a => {
-
-      if (ns.hasRootAccess(a))
-      {
-         // We only need to check, if we're root.
-
-         if (ns.getHackingLevel() >= ns.getServerRequiredHackingLevel(a) || ns.hasRootAccess(a))
-         {
-            const
-               hack_lvl_need = ns.getHackingLevel() * 0.5 >= ns.getServerRequiredHackingLevel(a),
-               hack_factor   = ns.getServerMaxMoney(a) / (ns.getServerMinSecurityLevel(a) + 1),
-               weight = (hack_lvl_need ? ns.getHackingLevel() : 0) * hack_factor;
-
-            target   = register < weight ? a      : target,
-            register = register < weight ? weight : register;
-         }
-      }
-   });
-   return target;
-}
-
  
 /**
  * Script header. Gives an info about the script and the used API.
@@ -149,12 +148,40 @@ export function get_next(ns)
 export function header(ns, api = 'ns', msg = '')
 {
    const a = {
-      'ns': 'Netscript',
-      'hn': 'Hacknet',
-      'si': 'Singularity'
+      'ns': 'Netscript',            // ns
+      'hn': 'Hacknet',              // hacknet
+      'bb': 'Bladeburner',          // bladeburner       (SF7)
+      'cc': 'CodingContract',       // codingcontract
+      'co': 'Corporation',          // corporation       Extends[WarehouseAPI, OfficeAPI]
+      'oa': 'OfficeAPI',            // officeapi         Requires[Office API upgrade from your corporation]
+      'wa': 'Warehouse API',        // warehouseapi      Requires[Warehouse API upgrade from your corporation]
+      'ga': 'Gang',                 // gang              (SF2)
+      //'gf': 'GangFormulas',         // gangformulas
+      //'gg': 'GangGenInfo',          // ganggeninfo
+      'gr': 'Grafting',             // grafting          (SF10)
+      'fo': 'Formulas',             // formulas          (Formulas.exe)
+      'in': 'Infiltration',         // infiltration
+      'si': 'Singularity',          // singularity       (SF4)
+      'st': 'Stanek\'s Gift API',   // stanek
+      'ti': 'TIX Stock Market API', // tix
+      'ui': 'User Interface'        // ui
    }
-   ns.tprintf(`${c.cyan}>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>`);
+   //ns.tprintf(`${c.cyan}>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>`);
+   div(ns);
    ns.tprintf(`${c.cyan}> API: ${a[api]} - ${msg}`);
+   div(ns);
+   //ns.tprintf(`${c.cyan}>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>`);
+}
+
+/**
+ * A visual divider.
+ * 
+ * @depends '/modules/colors.js'
+ * 
+ * @param {NS} ns The Netscript API.
+ */
+export function div(ns)
+{
    ns.tprintf(`${c.cyan}>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>`);
 }
 
@@ -178,3 +205,28 @@ export function footer(ns, msg = undefined)
    ns.tprintf(`${c.icyan}${msg ?? 'Script run finished'}`);
 }
 
+/**
+ * A hackish way to implement shell scripting in Bitburner.  
+ * Emulate terminal input.
+ *
+ * @param {string} cmd Run this command from the terminal.
+ */
+
+export function shell(cmd) {
+    /**
+     *  Template code from the official documentation of Bitburner:
+     *  https://bitburner.readthedocs.io/en/latest/netscript/advancedfunctions/inject_html.html 
+     */
+    const input = globalThis["document"].getElementById("terminal-input");
+    input.value = cmd;
+
+    const handler = Object.keys(input)[1];
+
+    input[handler].onChange({
+        target: input,
+    });
+    input[handler].onKeyDown({
+        key: "Enter",
+        preventDefault: () => null,
+    });
+}
