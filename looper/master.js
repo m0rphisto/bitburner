@@ -80,6 +80,7 @@ class Job
 const get_null_rams = (ns) => {
    let net = new Set(['home']);
    net.forEach(a => ns.scan(a).forEach(b => net.add(b).delete('home')));
+   net.forEach(a => ns.hasRootAccess(a) || net.delete(a));
    net.forEach(a => ns.getServerMaxRam(a) === 0 || net.delete(a));
    net.forEach(a => ns.getServerMaxMoney(a) === 0 && net.delete(a));
    return net.size;
@@ -96,11 +97,11 @@ const get_null_rams = (ns) => {
  */
 const get_max_threads = (ns, master, weaken, host = 'home') => {
    const // should be: weaken 1.75, grow 1.75, hack 1.60
-      has_ram = ns.getServerMaxRam(host) - ns.getUsedRam(host), // home has xGB available RAM (maxRam minus other running masters)
+      has_ram = ns.getServerMaxRam(host) - ns.getServerUsedRam(host), // home has xGB available RAM (maxRam minus other running masters)
       null_rams = get_null_rams(ns), // we have x nullRAMer
-      master_ram = ns.getScriptRam(master), // 1 thread of a master needs xGB
+      master_ram = ns.getScriptRam(master), // 1 thread of a master needs xGB (5.10)
       weaken_ram = ns.getScriptRam(weaken), // 1 thread of a weaken worker needs xGB (1.75)
-      master_ram_need = null_rams * master_ram, // we have x nullRAMers and need x masters (~4.75)
+      master_ram_need = null_rams * master_ram, // we have x nullRAMers and need x masters
       has_weaken_ram = has_ram - master_ram_need; // the rest is available for x nullRAMer's workers
       // and what to do, if no more sufficient RAM is available?
       if (has_weaken_ram > weaken_ram) {
