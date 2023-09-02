@@ -1,5 +1,5 @@
 /**
- * $Id: master.js v1.0 2023-08-31 17:01:46 CEST 4.75GB .m0rph $
+ * $Id: master.js v1.1 2023-09-31 22:24:32 CEST 5.10GB .m0rph $
  * 
  * Description:
  *    This is the looper master, that utilizes looper/{hack,grow,weaken}.js
@@ -39,7 +39,7 @@ import {
 } from '/modules/arguments.js';
 
 
-export function autocomplete(data, args) {
+export function autocomplete(data) {
    return [...data.servers];
 }
 
@@ -70,11 +70,51 @@ class Job
    }
 }
 
+/**
+ * We need the count of r00ted servers that have 0GB RAM for
+ * the calculation of the max possible worker threads.
+ *  
+ * @param {NS} ns The Netscript API.
+ * @returns {number} How many elements has the set?
+ */
+const get_null_rams = (ns) => {
+   let net = new Set(['home']);
+   net.forEach(a => ns.scan(a).forEach(b => net.add(b).delete('home')));
+   net.forEach(a => ns.getServerMaxRam(a) === 0 || net.delete(a));
+   net.forEach(a => ns.getServerMaxMoney(a) === 0 && net.delete(a));
+   return net.size;
+}
+
+/**
+ * Calculate the max possible threads, taking account of all already running masters, etc.
+ * 
+ * @param {NS} ns The Netscript API.
+ * @param {string} master The master's filename.
+ * @param {string} weaken The worker's filename.
+ * @param {string} host The host that the job is running on.
+ * @returns {number} Maximum count of a job thread.
+ */
+const get_max_threads = (ns, master, weaken, host = 'home') => {
+   const // should be: weaken 1.75, grow 1.75, hack 1.60
+      has_ram = ns.getServerMaxRam(host) - ns.getUsedRam(host), // home has xGB available RAM (maxRam minus other running masters)
+      null_rams = get_null_rams(ns), // we have x nullRAMer
+      master_ram = ns.getScriptRam(master), // 1 thread of a master needs xGB
+      weaken_ram = ns.getScriptRam(weaken), // 1 thread of a weaken worker needs xGB (1.75)
+      master_ram_need = null_rams * master_ram, // we have x nullRAMers and need x masters (~4.75)
+      has_weaken_ram = has_ram - master_ram_need; // the rest is available for x nullRAMer's workers
+      // and what to do, if no more sufficient RAM is available?
+      if (has_weaken_ram > weaken_ram) {
+         return Math.floor(has_weaken_ram / (weaken_ram * null_rams));
+      } else {
+         exit(ns, 'Sorry, we have no more RAM left.');
+      }
+}
+
 export async function main(ns) {
 
    'use strict';
 
-   const DEV = '', MAX = 3212;
+   const DEV = '';
 
    /**
     * Kill the actual script on the target server.
@@ -137,11 +177,13 @@ export async function main(ns) {
       scripts  = new Map(),
       types    = ['weaken', 'grow', 'hack'];
 
+   for (let type of types)
+      scripts.set(type, `/looper${DEV}/${type}.js`);
+
+   const MAX = get_max_threads(ns, ns.getScriptName(), scripts.get('weaken'));
 
    for (let type of types)
    {
-      scripts.set(type, `/looper${DEV}/${type}.js`);
-
       job[type]         = new Job(type, target);
       job[type].pid     = ns.pid;
       job[type].target  = target;
@@ -174,7 +216,7 @@ export async function main(ns) {
                   ? 'hack'
                   : 'grow';
 
-         if(next != cmd)
+         if (next != cmd)
          {
             // We need a new job, so we kill the old one ...
 

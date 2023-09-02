@@ -1,5 +1,5 @@
 /**
- * $Id: allstart.js v1.5 2023-08-31 16:19:48 6.40GB .m0rph $
+ * $Id: allstart.js v1.5 2023-08-31 16:19:48 6.30GB .m0rph $
  * 
  * description:
  *    Restarts all looper scripts on hacked and on purchased servers.
@@ -38,7 +38,6 @@ export async function main(ns) {
    let hosts  = new Set(['home']); // Get a complete r00ted hosts list.
    hosts.forEach(a => ns.scan(a).forEach(b => b.match('pserv') ?? hosts.add(b).delete('home')));
    ['darkweb', 'The-Cave', 'w0r1d_d43m0n'].forEach(h => hosts.delete(h)); // Have 0GB but $0 max also
-   // Teporarily disabled n00dles due to looper-2 development.
 
    header(ns, 'ns', 'allstart run');
    
@@ -53,24 +52,15 @@ export async function main(ns) {
          if (ns.getHackingLevel() >= ns.getServerRequiredHackingLevel(host))
          {
             // Only just in case the hosts wasn't already r00ted.
+
             if (!ns.hasRootAccess(host)) await ns.run(deploy, 1, host);
             if ( ns.hasRootAccess(host) && ns.getServerMaxMoney(host) > 0)
             {
-               // BUT: We should await the deploy and master runs,
-               //      or we will get confusing output.
-
                if (ns.getServerMaxRam(host) > 0)
                {
                   // Here the servers that can hack themselves ...
 
-                  if (
-                     ns.isRunning(weaken, host, '') ||
-                     ns.isRunning(grow,   host, '') ||
-                     ns.isRunning(hack,   host, '')
-                  ) {
-                     ns.tprintf(`${c.white}One of the H/G/W scripts active on ${host}. Trying to kill it ... ${ns.killall(host) ? 'OK' : 'FAILED'}.`);
-                  } 
-
+                  ns.killall(host);
                   ns.tprintf(`${c.white}Starting local ${master} for ${host}.`);
                   free(ns, master) && await ns.run(master, 1, host);
                }

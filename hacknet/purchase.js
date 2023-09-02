@@ -1,5 +1,5 @@
 /**
- * $Id: purchase.js v0.2 2023-08-17 16:42:05 5.70GB .m0rph $
+ * $Id: purchase.js v0.3 2023-09-02 19:47:11 5.70GB .m0rph $
  * 
  * description:
  *    Automated hacknet management process.
@@ -13,18 +13,6 @@
 import {c} from '/modules/colors.js';
 import {d} from '/modules/datetime.js';
 
-/**
- * Looper logger. We need a grepable logfile for later analysis.
- * 
- * @param {string}   data  Text that is written to the logfile.
- * @param {string}   mode  File open mode >> w = create new file, a = append to file.
- */
-const timestamp = d.timestamp();
-function log (ns, data, mode) {
-   const m = mode ? mode : 'w';
-   ns.print(`${c.cyan}${data}${c.reset}`);
-   ns.write(`/log/hacknet.purchase.${timestamp}.js`, data, m);
-}
 
 /**
  * Purchase hacknet nodes.
@@ -44,7 +32,7 @@ async function purchase(ns, num_nodes)
       {
          let id = ns.hacknet.purchaseNode();
 
-         if (id !== -1) log(ns, `[${d.gettime()}] Purchased hacknet node ${id}.`, 'a');
+         if (id !== -1) ns.print(`${c.cyan}[${d.gettime()}] Purchased hacknet node ${id}.`);
          else
             throw new Error(`Could not purchase hacknet node ${id}.`);
       }
@@ -63,7 +51,7 @@ export async function main(ns) {
    
    ns.disableLog('sleep');
    ns.disableLog('getServerMoneyAvailable' );
-   log(ns, `Hacknet node purchase run started at ${d.getdate()}, ${d.gettime()}:`);
+   ns.print(`${c.cyan}Hacknet node purchase run started at ${d.getdate()}, ${d.gettime()}:`);
 
    // We start at a number of three hacknet nodes ...
    await purchase(ns, 3);
