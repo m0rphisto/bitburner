@@ -1,5 +1,5 @@
 /** 
- * $Id: purchtest.js v0.4 2023-08-29 15:36:25 8.15GB .m0rph $
+ * $Id: purchtest.js v0.5 2023-09-02 23:41:39 8.15GB .m0rph $
  * 
  * description:
  *    Calculate and display how much much an upgrade or the purchase of
@@ -77,7 +77,7 @@ export async function main(ns) {
             if (ps.maxRam < ram)
             {
                const rc = ns.getPurchasedServerUpgradeCost(pserv, ram);
-               ns.tprintf(`${c.cyan}An upgrade for ${pserv} at ${ns.formatRam(ps.maxRam)} RAM costs $${ns.formatNumber(rc)}.`);
+               ns.tprintf(`${c.cyan}An upgrade for ${pserv} at ${ns.formatRam(ps.maxRam)} up to ${ns.formatRam(ram)} RAM costs $${ns.formatNumber(rc)}.`);
                cost += rc;
             }
          }
