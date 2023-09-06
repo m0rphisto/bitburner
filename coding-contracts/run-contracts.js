@@ -9,7 +9,7 @@
  * @param {NS} ns
  */
 import { c } from '/modules/colors.js';
-import { header, div, footer } from '/modules/helpers.js';
+import { header, div } from '/modules/helpers.js';
 import { ctypes, get_network } from '/lib/coding-contracts.js';
 export async function main(ns) {
 
@@ -37,5 +37,5 @@ export async function main(ns) {
       }
       div(ns);
    }
-   footer(ns, 'Coding contracts run finished');
+   ns.tprintf(`${c.icyan}Coding contracts run finished`);
 }
