@@ -20,20 +20,19 @@ export async function main(ns) {
       get_paths = (rows, cols) => {
          let i, k, grid = [[]];
          // Adding the first row of 1's to the array.
-         for (k = 0; k < cols; k++) {
+         for (k = 0; k < cols; k++)
             grid[0].push(1);
-         }
          // Iterate over each row.
          for (i = 1; i < rows; i++) {
             grid.push([1]); // Adding 1 to the first, left most square.
             // Get the total for the current square.
-            for (k = 1; k < cols; k++) {
-            grid[i][k] = grid[i][k - 1] + grid[i - 1][k];
+            for (k = 1; k < cols; k++)
+               grid[i][k] = grid[i][k - 1] + grid[i - 1][k];
          }
-      }
-      // Return the bottom right hand value that has the total.
-      return grid[i - 1][k - 1];
-   }
+         // Return the bottom right hand value that has the total.
+         return grid[i - 1][k - 1];
+      };
+      
    let result = ns.codingcontract.attempt(get_paths(cdata[0], cdata[1]), cc.file, cc.host);
    ns.tprintf(`${c.white}Result: ${c.green}${result}`);
 }
