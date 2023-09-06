@@ -122,13 +122,11 @@ export function get_next(ns)
  */
 export function free(ns, script, threads = 1, server = 'home')
 {
-   if (! ns.fileExists(script, server))
-   {
+   if (! ns.fileExists(script, server)) {
       ns.tprintf(`${c.red}[ERROR] ${script} does not exist.`);
       return !!0;
    }
-   if (ns.getScriptRam(script, server) * threads > ns.getServerMaxRam(server) - ns.getServerUsedRam(server))
-   {
+   if (ns.getScriptRam(script, server) * threads > ns.getServerMaxRam(server) - ns.getServerUsedRam(server)) {
       ns.tprintf(`${c.magenta}Sorry, we need more free RAM. Cannot start ${script} !!!`);
       return !!0;
    }
@@ -166,11 +164,9 @@ export function header(ns, api = 'ns', msg = '')
       'ti': 'TIX Stock Market API', // tix
       'ui': 'User Interface'        // ui
    }
-   //ns.tprintf(`${c.cyan}>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>`);
    div(ns);
    ns.tprintf(`${c.cyan}> API: ${a[api]} - ${msg}`);
    div(ns);
-   //ns.tprintf(`${c.cyan}>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>`);
 }
 
 /**
