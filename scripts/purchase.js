@@ -1,5 +1,5 @@
 /** 
- * Id: purchase.js v0.8 2023-08-28 09:00:22 8.45GB .m0prh $
+ * Id: purchase.js v0.9 2023-09-07 07:26:21 8.45GB .m0prh $
  * 
  * Options:
  *    -r [0-9]+   RAM for server to purchase
@@ -25,7 +25,7 @@ export async function main(ns) {
    const
       master   = '/looper/master.js',
       files    = [
-         '/modules/colors.js', '/modules/datetime.js', 'modules/arguments.js',
+         '/modules/colors.js', '/modules/datetime.js', '/modules/arguments.js', '/modules/helpers.js',
          '/looper/weaken.js', '/looper/grow.js', '/looper/hack.js', master
       ],
       ram      = get_option(ns, '-r') ?? 8192,
