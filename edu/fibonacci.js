@@ -1,5 +1,5 @@
  /**
-  * $Id: fibonacci.js v0.1 2023-09-08 23:05:34 3.00GB .m0rph $
+  * $Id: fibonacci.js v0.1 2023-09-09 00:29:34 3.00GB .m0rph $
   * 
   * Description:
   *   This educational script calculats Fibonacci numbers.
@@ -25,6 +25,7 @@ export async function main(ns) {
 
    const for_loop_fib = (max) => {
       // Bottom up variant. (my own)
+      // => tabulation
       for (let i = 0; i < max + 1; i++) {
          if (i < 2) {
             fibonacci[i] = i;
@@ -58,9 +59,7 @@ export async function main(ns) {
       }
       return lookup[n];
    }
-   const tabulation_rec_fib = (n) => {
-      return `Fibonacci number of ${n} Coming soon.`;
-   }
+
    ns.tprintf(`${c.white}for_loop_fib(), a simple function with a for loop:\n${for_loop_fib(max)}`);
    div(ns);
    ns.tprintf(`${c.white}stat_rec_fib(), a static recursive function:\n${c.red}Deactivated because Bitburner runs into infinite loop state.`);
