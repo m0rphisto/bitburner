@@ -2,10 +2,10 @@
   * $Id: multidimarray.js v0.1 2023-09-09 10:22:37 1.60GB .m0rph $
   * 
   * Description:
-  *   This educational script creates multidimensional array.
+  *   This educational script has an object with multidimensional arrays.
   * 
-  *   I want to know, if I can create an array that for instance
-  *   has rows with different lengths.
+  *   I want to know, if I can create an array that has rows with
+  *   different lengths.
   * 
   * 
   * @param {NS} ns The Netscripts API.
@@ -61,8 +61,12 @@ export async function main(ns) {
     * Resumee:
     * 
     * So, what have we learned?
-    *    It is OK ok to have multidimensional array, respectively matrices with diferent length,
-    *    but we have  to catch upcoming errors! For example arr.length cannot read indices
-    *    from non existent elements. 
+    * 
+    *    It is OK ok to have multidimensional arrays, respectively matrices with
+    *    different lengths, but we have to catch upcoming errors!
+    * 
+    *    For example:
+    *       The Array.method().length cannot read indices from
+    *       non existent elements and throws an error. 
     */
 }
