@@ -19,7 +19,7 @@ export async function main(ns) {
       cdata = ns.codingcontract.getData(cc.file, cc.host),
       get_ways = (sum) => {
          let ways = Array.from({length: sum + 1}, () => 0);
-         // Adding the first row of 1's to the array.
+         // Adding the first element to the array.
          ways[0] = 1;
          // Iterate over the range 1 to ((sum - 1) + 1) => sum.
          for (let row = 1; row < sum; row++) {
