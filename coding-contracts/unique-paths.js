@@ -33,6 +33,6 @@ export async function main(ns) {
          return grid[i - 1][k - 1];
       };
       
-   let result = ns.codingcontract.attempt(get_paths(cdata[0], cdata[1]), cc.file, cc.host);
+   let result = await ns.codingcontract.attempt(get_paths(cdata[0], cdata[1]), cc.file, cc.host);
    ns.tprintf(`${c.white}Result: ${c.green}${result}`);
 }

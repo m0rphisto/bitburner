@@ -63,7 +63,7 @@ export async function main(ns) {
     * So, what have we learned?
     * 
     *    It is OK ok to have multidimensional arrays, respectively matrices with
-    *    different lengths, but we have to catch upcoming errors!
+    *    different lengths in rows, but we have to catch upcoming errors!
     * 
     *    For example:
     *       The Array.method().length cannot read indices from
