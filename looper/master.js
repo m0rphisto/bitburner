@@ -20,6 +20,11 @@
  *    weaken is 4x hacktime, grow is 3.2x, hack is 1x
  *    ToDo: bake it into the monitoring.
  * 
+ * 2023-09-17: ToDo:
+ *    Check if the const get_max_threads = (ns, master, weaken, host = 'home') => {
+ *    has to be reworked! Sometime, especially after a RAM Upgrade, one nullRAMer
+ *    grabs off the COMPLETE memory.
+ * 
  * 
  * @param {NS}       ns       The Netscript API.
  * @param {string}   target   Hostname of the target server.                       (ns.args[0])
@@ -190,7 +195,9 @@ export async function main(ns) {
       job[type].target  = target;
  
       let max = Math.floor(has_ram / ns.getScriptRam(scripts.get(type))); 
-      job[type].threads = base == 'home' && max > MAX ? MAX : max;
+      job[type].threads = base == 'home' ? MAX : max;
+      // something's buggy here...
+      //job[type].threads = base == 'home' && max > MAX ? MAX : max;
    }
 
    // At the beginning we start a weaken script ...
