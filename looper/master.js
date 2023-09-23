@@ -1,5 +1,5 @@
 /**
- * $Id: master.js v1.1 2023-09-31 22:24:32 CEST 5.10GB .m0rph $
+ * $Id: master.js v1.2 2023-09-23 03:05:09 CEST 5.10GB .m0rph $
  * 
  * Description:
  *    This is the looper master, that utilizes looper/{hack,grow,weaken}.js
@@ -112,7 +112,7 @@ const get_max_threads = (ns, master, weaken, host = 'home') => {
       if (has_weaken_ram > weaken_ram) {
          return Math.floor(has_weaken_ram / (weaken_ram * null_rams));
       } else {
-         exit(ns, 'Sorry, we have no more RAM left.');
+         exit(ns, `Sorry, we have no more RAM left on ${host}.`);
       }
 }
 
@@ -186,7 +186,7 @@ export async function main(ns) {
    for (let type of types)
       scripts.set(type, `/looper${DEV}/${type}.js`);
 
-   const MAX = get_max_threads(ns, ns.getScriptName(), scripts.get('weaken'));
+   const MAX = get_max_threads(ns, ns.getScriptName(), scripts.get('weaken'), base);
 
    for (let type of types)
    {
