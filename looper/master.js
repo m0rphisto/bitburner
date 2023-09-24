@@ -186,7 +186,7 @@ export async function main(ns) {
    for (let type of types)
       scripts.set(type, `/looper${DEV}/${type}.js`);
 
-   const MAX = get_max_threads(ns, ns.getScriptName(), scripts.get('weaken'), base);
+   const MAX = get_max_threads(ns, ns.getScriptName(), scripts.get('weaken'));
 
    for (let type of types)
    {
