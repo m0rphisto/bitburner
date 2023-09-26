@@ -1,5 +1,5 @@
 /**
- * $Id: master.js v1.2 2023-09-23 03:05:09 CEST 5.10GB .m0rph $
+ * $Id: master.js v1.3 2023-09-27 01:00:35 CEST 5.15GB .m0rph $
  * 
  * Description:
  *    This is the looper master, that utilizes looper/{hack,grow,weaken}.js
@@ -84,7 +84,7 @@ class Job
  */
 const get_null_rams = (ns) => {
    let net = new Set(['home']);
-   net.forEach(a => ns.scan(a).forEach(b => net.add(b).delete('home')));
+   net.forEach(a => ns.scan(a).forEach(b => b.match('pserv') ?? net.add(b).delete('home')));
    net.forEach(a => ns.hasRootAccess(a) || net.delete(a));
    net.forEach(a => ns.getServerMaxRam(a) === 0 || net.delete(a));
    net.forEach(a => ns.getServerMaxMoney(a) === 0 && net.delete(a));
@@ -100,7 +100,7 @@ const get_null_rams = (ns) => {
  * @param {string} host The host that the job is running on.
  * @returns {number} Maximum count of a job thread.
  */
-const get_max_threads = (ns, master, weaken, host = 'home') => {
+const get_max_threads = (ns, master, weaken, host = ns.getHostname()) => {
    const // should be: weaken 1.75, grow 1.75, hack 1.60
       has_ram = ns.getServerMaxRam(host) - ns.getServerUsedRam(host), // home has xGB available RAM (maxRam minus other running masters)
       null_rams = get_null_rams(ns), // we have x nullRAMer
