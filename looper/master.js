@@ -14,16 +14,14 @@
  * 
  * Note:
  *    The looper scripts have to be available on the target server.
- *    We use looper/deploy.js for that in front.
+ *    We use looper/deploy.js for that in front. And don't forget
+ *    to do a redeploy on any looper/master changes, especially on
+ *    purchased servers or nullRAMers!
  * 
  * Note from discord:
  *    weaken is 4x hacktime, grow is 3.2x, hack is 1x
  *    ToDo: bake it into the monitoring.
- * 
- * 2023-09-17: ToDo:
- *    Check if the const get_max_threads = (ns, master, weaken, host = 'home') => {
- *    has to be reworked! Sometime, especially after a RAM Upgrade, one nullRAMer
- *    grabs off the COMPLETE memory.
+ *    ToDo: check for analyze methods.
  * 
  * 
  * @param {NS}       ns       The Netscript API.
