@@ -1,5 +1,5 @@
 /**
- * $Id: master.js v1.3 2023-09-27 01:00:35 CEST 5.15GB .m0rph $
+ * $Id: master.js v1.4 2023-10-29 06:43:33 CEST 5.15GB .m0rph $
  * 
  * Description:
  *    This is the looper master, that utilizes looper/{hack,grow,weaken}.js
@@ -31,6 +31,22 @@
  *                            and attacks an external target, e.g. on a purchased
  *                            server, false otherwise.
  */
+
+
+// DEV is for development purposes. We then use a spcial folder!
+//const DEV = '-dev';
+const DEV = '';
+
+// Do we need some debug output?
+// Be careful! Debugging makes this pack very slow,
+// especially when utilized by allstart.js and activated
+// tail().
+const DEBUG = !!1;
+const TAIL = !!0;
+
+// OK, let's see where...
+const NULL_RAMS = !!1;
+const MAX_THREADS = !!0;
 
 import {c} from '/modules/colors.js';
 import {d} from '/modules/datetime.js';
@@ -86,6 +102,8 @@ const get_null_rams = (ns) => {
    net.forEach(a => ns.hasRootAccess(a) || net.delete(a));
    net.forEach(a => ns.getServerMaxRam(a) === 0 || net.delete(a));
    net.forEach(a => ns.getServerMaxMoney(a) === 0 && net.delete(a));
+   if (DEBUG && NULL_RAMS)
+      ns.printf(`get_null_rams.net.size: ${net.size}`)
    return net.size;
 }
 
@@ -106,19 +124,23 @@ const get_max_threads = (ns, master, weaken, host = ns.getHostname()) => {
       weaken_ram = ns.getScriptRam(weaken), // 1 thread of a weaken worker needs xGB (1.75)
       master_ram_need = null_rams * master_ram, // we have x nullRAMers and need x masters
       has_weaken_ram = has_ram - master_ram_need; // the rest is available for x nullRAMer's workers
-      // and what to do, if no more sufficient RAM is available?
-      if (has_weaken_ram > weaken_ram) {
-         return Math.floor(has_weaken_ram / (weaken_ram * null_rams));
-      } else {
-         exit(ns, `Sorry, we have no more RAM left on ${host}.`);
-      }
+   if (DEBUG && MAX_THREADS)
+      ns.printf(`get_max_threads.has_weaken_ram: ${has_weaken_ram}`)
+   // and what to do, if no more sufficient RAM is available?
+   if (has_weaken_ram > weaken_ram) {
+      return Math.floor(has_weaken_ram / (weaken_ram * null_rams));
+   } else {
+      exit(ns, `Sorry, we have no more RAM left on ${host}.`);
+   }
 }
 
 export async function main(ns) {
 
    'use strict';
 
-   const DEV = '';
+   // Do we need to have some debug output?
+   if (DEBUG && TAIL)
+      ns.tail();
 
    /**
     * Kill the actual script on the target server.
