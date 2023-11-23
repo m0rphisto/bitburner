@@ -5,6 +5,9 @@
  * We need to be able to pass an array from the command line.
  * Or maybe parse an ini-file.
  * 
+ * 2023-11-23:
+ *    Just doin' a little testing. :-)
+ * 
  * @param {NS} ns The Netscript API.
  */
 
