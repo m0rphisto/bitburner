@@ -39,7 +39,7 @@ https://academy.hackthebox.com/
 This is only a test section:
 Did create that file only in order to check, if the movement of repository and keys worked as supposed.
 
-### .m0rph@winbox: That fuckin' ain't !!! It worked !!!
-## .m0rph@kali: Now I can also work underway on the laptop...
+## .m0rph@winbox: That fuckin' ain't !!! It worked !!!
+### .m0rph@kali: Now I can also work underway on the laptop...
 
 .m0rph
